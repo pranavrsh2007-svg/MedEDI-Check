@@ -1,6 +1,6 @@
 # MedEDI-Check
 
-MedEDI-Check is a comprehensive Healthcare EDI parser and X12 Validator. It supports 837 (Claims), 835 (Remittances), and 834 (Enrollment) transactions, providing a hierarchical view of the EDI structure, a detailed validation report with suggested fixes, and an AI-powered assistant for further insights.
+medEDI-Check is a comprehensive Healthcare EDI parser and X12 Validator. It supports 837 (Claims), 835 (Remittances), and 834 (Enrollment) transactions, providing a hierarchical view of the EDI structure, a detailed validation report with suggested fixes, and an AI-powered assistant for further insights.
 
 ## Features
 - **Hierarchical EDI Viewer**: Visualize complex X12 structures easily.
