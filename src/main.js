@@ -422,10 +422,16 @@ document.querySelector('#app').innerHTML = `
               <h2 class="text-2xl font-bold text-slate-800">Validation Report</h2>
               <p class="text-slate-500 text-sm mt-1">Detected 3 issues in claim_batch_005.edi</p>
             </div>
-            <button id="revalidate-btn" onclick="window.revalidateFile()" class="btn-primary flex items-center shadow-sm text-sm">
-               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-               Revalidate
-            </button>
+             <div class="flex space-x-3">
+                <button id="download-btn" onclick="window.downloadFixedFile()" class="btn-secondary hidden flex items-center shadow-sm text-sm">
+                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                   Download EDI
+                </button>
+                <button id="revalidate-btn" onclick="window.revalidateFile()" class="btn-primary flex items-center shadow-sm text-sm">
+                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                   Revalidate
+                </button>
+             </div>
          </div>
 
          <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -671,7 +677,7 @@ document.querySelector('#app').innerHTML = `
             <div class="p-4 bg-slate-50 border-t border-slate-100">
                <div class="relative">
                   <input id="aiInput" type="text" placeholder="Type your message..." class="w-full pl-5 pr-14 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all shadow-sm">
-                  <button class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:bg-blue-700 transition shadow-sm">
+                  <button id="sendAI" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white hover:bg-blue-700 transition shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                  </button>
               </div>
@@ -1209,6 +1215,16 @@ window.updateValidationReportUI = function (errors, fileName, transType = 'unkno
         `;
     tbody.appendChild(tr);
   });
+
+  // Show/Hide Download button if there's content to download
+  const downloadBtn = document.getElementById('download-btn');
+  if (downloadBtn) {
+    if (window.currentUploadedFileContent) {
+      downloadBtn.classList.remove('hidden');
+    } else {
+      downloadBtn.classList.add('hidden');
+    }
+  }
 }
 
 let currentFixSegment = null;
@@ -1516,7 +1532,84 @@ if (themeToggle) {
   });
 }
 
+// AI Assistant Chat Logic
+window.addChatMessage = function(text, isUser = false) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+
+  const msgDiv = document.createElement('div');
+  if (isUser) {
+    msgDiv.className = 'flex items-start flex-row-reverse animate-fade-in';
+    msgDiv.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white ml-3 shadow-sm shrink-0 font-bold text-xs">
+        JD
+      </div>
+      <div class="bg-blue-600 rounded-2xl p-4 text-sm text-white shadow-sm rounded-tr-none max-w-[80%] inline-block">
+        ${text}
+      </div>
+    `;
+  } else {
+    msgDiv.className = 'flex items-start animate-fade-in';
+    msgDiv.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white mr-3 shadow-sm shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      </div>
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-700 shadow-sm rounded-tl-none max-w-[80%] inline-block">
+        ${text}
+      </div>
+    `;
+  }
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+window.handleAISend = function() {
+  const input = document.getElementById('aiInput');
+  if (!input || !input.value.trim()) return;
+
+  const text = input.value.trim();
+  window.addChatMessage(text, true);
+  input.value = '';
+
+  // Simulated AI Response
+  setTimeout(() => {
+    let response = "I'm analyzing your request regarding EDI structures. Based on the context, it seems you're working with X12 protocols. How can I specifically help with your segment data?";
+    
+    if (text.toLowerCase().includes('n4')) {
+      response = "The N4 segment specifies the city, state, and zip code. If you're missing the zip (N403), the claim might be rejected by the clearinghouse. Always ensure N4*CITY*ST*ZIP~ format.";
+    } else if (text.toLowerCase().includes('isa')) {
+      response = "The ISA segment is the Interchange Control Header. It's the very first segment in any X12 file and defines the separators used (like * for elements and ~ for segments).";
+    }
+
+    window.addChatMessage(response, false);
+  }, 1000);
+}
+
+window.downloadFixedFile = function() {
+  if (!window.currentUploadedFileContent) return;
+  
+  const content = window.currentUploadedFileContent;
+  const fileName = (window.currentUploadedFileName || 'corrected').replace(/\.(edi|txt)$/i, '') + '_fixed.edi';
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 // Initialize on first load
 document.addEventListener('DOMContentLoaded', () => {
   window.runDashboardAnimations();
+
+  const sendBtn = document.getElementById('sendAI');
+  const aiInput = document.getElementById('aiInput');
+  if (sendBtn) sendBtn.addEventListener('click', window.handleAISend);
+  if (aiInput) aiInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') window.handleAISend();
+  });
 });
