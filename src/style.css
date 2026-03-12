@@ -2,38 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-yellow: #f59e0b;
+  --accent-red: #ef4444;
+  --bg-hover: rgba(59, 130, 246, 0.05);
+}
+
+.dark {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-sidebar: #020617;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
+  --accent-blue: #60a5fa;
+  --accent-green: #34d399;
+  --accent-yellow: #fbbf24;
+  --accent-red: #f87171;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+}
+
 @layer base {
   body {
-    @apply text-slate-800 bg-slate-50;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    @apply transition-colors duration-300;
   }
 }
 
 @layer components {
+  aside {
+    background-color: var(--bg-sidebar);
+    border-color: var(--border-color);
+  }
+
   .btn-primary {
-    @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium;
+    background-color: var(--accent-blue);
+    @apply px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all duration-200 font-medium shadow-sm active:scale-95;
   }
+  
   .btn-secondary {
-    @apply px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors duration-200 font-medium;
+    background-color: var(--accent-green);
+    @apply px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all duration-200 font-medium shadow-sm active:scale-95;
   }
+
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-slate-100 p-6;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    @apply rounded-xl shadow-sm p-6 transition-all duration-300;
   }
+  
+  .card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: var(--accent-blue);
+  }
+
+  .dark .card:hover {
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+    border-color: var(--accent-blue);
+  }
+
+  /* Table container — prevents clipping on initial paint */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Table styling */
+  .validation-table {
+    @apply w-full text-left text-sm whitespace-nowrap overflow-hidden rounded-xl;
+    min-width: 700px;
+    table-layout: auto;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+  }
+
+  .validation-table thead {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+  }
+
+  .validation-table th {
+    @apply px-6 py-4 border-b font-semibold tracking-wider uppercase text-xs;
+    border-color: var(--border-color);
+  }
+
+  .validation-table tr {
+    @apply border-b last:border-0 transition-colors;
+    border-color: var(--border-color);
+  }
+
+  .validation-table tr:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .validation-table td {
+    @apply px-6 py-4;
+    color: var(--text-secondary);
+  }
+
   .badge-success {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+    background-color: var(--accent-green);
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-white transition-colors duration-300;
   }
+  
   .badge-error {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+    background-color: var(--accent-red);
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-white transition-colors duration-300;
   }
+  
   .badge-warning {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800;
+    background-color: var(--accent-yellow);
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-black transition-colors duration-300;
+  }
+
+  .dark .badge-success, .dark .badge-error {
+    @apply text-white;
   }
   
   /* Tree view lines */
   .tree-node-line {
-    @apply relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px before:bg-slate-300;
+    @apply relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px;
+    &::before {
+      background-color: var(--border-color);
+    }
   }
   .tree-node-vertical {
-    @apply relative after:content-[''] after:absolute after:-left-4 after:top-0 after:h-full after:w-px after:bg-slate-300;
+    @apply relative after:content-[''] after:absolute after:-left-4 after:top-0 after:h-full after:w-px;
+    &::after {
+      background-color: var(--border-color);
+    }
   }
   
   /* Scrollbar styling */
@@ -45,10 +152,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full;
+    background-color: var(--border-color);
+    @apply rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400;
+    background-color: var(--text-secondary);
   }
 }
 
