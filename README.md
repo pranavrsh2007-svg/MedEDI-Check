@@ -1,5 +1,5 @@
 # MedEDI-Check: Healthcare EDI Parser & X12 Validator
-
+ 
 MedEDI-Check is a modern, high-performance web dashboard designed to parse, validate, and visualize Healthcare EDI (Electronic Data Interchange) files. It simplifies the complex world of X12 transactions, providing clear insights and actionable error reports.
 
 ![MedEDI-Check Dashboard](https://img.shields.io/badge/Status-Active-brightgreen)
@@ -61,3 +61,15 @@ MedEDI-Check is a modern, high-performance web dashboard designed to parse, vali
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+#### 👥 Team – Error
+
+**Team Members**
+
+**Pranav Shinde**
+**Samarth Shinde**
+**Shubham Wadinkar**
+**Swaraj Bhosale**
+
+💡 *We built this project as part of a hackathon to simplify healthcare EDI validation and error detection.*
+
