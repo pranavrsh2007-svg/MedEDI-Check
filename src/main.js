@@ -4,10 +4,8 @@ document.querySelector('#app').innerHTML = `
   <!-- Sidebar Navigation -->
   <aside id="sidebar" class="w-64 border-r flex flex-col h-full z-50 shadow-sm fixed md:static transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out">
     <div class="h-16 flex items-center px-6 border-b transition-colors duration-300">
-      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center mr-3 text-white font-bold shadow-md">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
-        </svg>
+      <div class="logo-container flex items-center">
+        <img src="/logo.png" alt="HealthEDI Analyzer Logo" class="w-9 h-9 rounded-[10px] object-cover mr-[10px] shadow-sm">
       </div>
       <h1 class="text-lg font-bold tracking-tight transition-colors duration-300">HealthEDI Analyzer</h1>
     </div>
@@ -433,11 +431,10 @@ document.querySelector('#app').innerHTML = `
                 </button>
              </div>
          </div>
-
          <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-             <div id="validationTable" class="lg:col-span-3 transition-all duration-300 card p-0 overflow-hidden shadow-sm rounded-xl">
-                <div class="w-full overflow-x-auto">
-                   <table class="validation-table min-w-[700px]">
+             <div id="validationTable" class="transition-all duration-500 lg:col-span-5 card p-0 overflow-hidden shadow-sm rounded-xl">
+                <div class="w-full overflow-x-auto scrollbar-thin">
+                   <table class="validation-table w-full min-w-full table-auto">
                       <thead>
                       <tr>
                          <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Severity</th>
@@ -1543,6 +1540,11 @@ window.viewFix = function (segment, description, loop, severity, buttonEl) {
     table.classList.replace('lg:col-span-5', 'lg:col-span-3');
     panel.classList.remove('hidden');
     panel.classList.add('flex');
+    
+    // Smooth scroll and layout recalculation
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 300);
   } else {
     // Mobile/Tablet View
     modal.classList.remove('hidden');
@@ -1853,4 +1855,25 @@ window.downloadFixedFile = function() {
 // Initialize on first load
 document.addEventListener('DOMContentLoaded', () => {
   window.runDashboardAnimations();
+  
+  // Startup Splash Animation
+  const splash = document.createElement('div');
+  splash.id = 'startup-splash';
+  splash.innerHTML = `
+    <div class="splash-content flex flex-col items-center">
+      <div class="startup-logo mb-6">
+        <img src="/logo.png" alt="HealthEDI Logo">
+      </div>
+      <h1 class="splash-text">HealthEDI Analyzer</h1>
+    </div>
+  `;
+  document.body.appendChild(splash);
+  
+  // Fade out and remove
+  setTimeout(() => {
+    splash.classList.add('fade-out');
+    setTimeout(() => {
+      splash.remove();
+    }, 500);
+  }, 1200);
 });

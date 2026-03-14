@@ -80,7 +80,8 @@
   /* Table styling */
   .validation-table {
     @apply w-full text-left text-sm whitespace-nowrap overflow-hidden rounded-xl;
-    min-width: 700px;
+    width: 100%;
+    min-width: 100%;
     table-layout: auto;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -176,4 +177,72 @@
 @keyframes spinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Startup Splash Screen */
+#startup-splash {
+  position: fixed;
+  inset: 0;
+  background-color: #0F172A;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+#startup-splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-content {
+  text-align: center;
+  animation: splashIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.startup-logo {
+  margin: 0 auto 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.startup-logo img {
+  width: 200px;
+  height: auto;
+  filter: drop-shadow(0 0 25px #2563EB);
+  animation: logoPulse 1.2s ease-in-out forwards;
+}
+
+@keyframes logoPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.splash-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.025em;
+}
+
+@keyframes splashIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(37, 99, 235, 0.6); }
 }
