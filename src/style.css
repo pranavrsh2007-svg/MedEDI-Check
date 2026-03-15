@@ -126,6 +126,21 @@
     @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-black transition-colors duration-300;
   }
 
+  .badge-purple {
+    background-color: #a855f7;
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-white transition-colors duration-300;
+  }
+
+  .badge-blue {
+    background-color: #3b82f6;
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-white transition-colors duration-300;
+  }
+
+  .badge-neutral {
+    background-color: #64748b;
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold text-white transition-colors duration-300;
+  }
+
   .dark .badge-success, .dark .badge-error {
     @apply text-white;
   }

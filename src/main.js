@@ -1,5 +1,13 @@
 import './style.css'
 
+// Global EDI Store for shared state management
+window.ediStore = {
+  uploadedFiles: JSON.parse(localStorage.getItem('edi_files') || '[]'),
+  currentFile: null,
+  parsedData: null,
+  validationResults: []
+};
+
 document.querySelector('#app').innerHTML = `
   <!-- Sidebar Navigation -->
   <aside id="sidebar" class="w-64 border-r flex flex-col h-full z-50 shadow-sm fixed md:static transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out">
@@ -78,91 +86,70 @@ document.querySelector('#app').innerHTML = `
     <div id="workspace" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
        <!-- Dashboard View -->
        <section id="view-dashboard" class="view-section animate-fade-in block">
-          
-          <div class="flex justify-between items-end mb-8">
-            <div>
-              <p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Overview</p>
-              <h3 class="text-2xl font-bold">EDI Performance</h3>
-            </div>
-            <button class="btn-primary flex items-center shadow-md shadow-blue-500/30" onclick="window.exportReport()">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-              Export Report
-            </button>
-          </div>
+           
+           <div class="flex justify-between items-end mb-6">
+             <div>
+               <p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Overview</p>
+               <h3 class="text-2xl font-bold flex items-center">
+                 EDI Performance
+                 <span id="dashboard-type-badge" class="ml-3 hidden"></span>
+               </h3>
+             </div>
+             <button class="btn-primary flex items-center shadow-md shadow-blue-500/30" onclick="window.exportReport()">
+               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+               Export Report
+             </button>
+           </div>
 
-          <!-- Stats Row -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="card animate-fade-in hover:shadow-md transition-shadow relative overflow-hidden group">
-              <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" /></svg>
-              </div>
-              <div class="flex items-center text-slate-500 dark:text-slate-400 mb-4 transition-colors duration-300">
-                <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center mr-3">
-                  <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                </div>
-                <h3 class="font-medium text-slate-500 dark:text-slate-400">Total Claims</h3>
-              </div>
-              <h2 id="claimsCount" class="text-3xl font-bold">0</h2>
-              <p class="text-sm text-blue-600 dark:text-blue-500 mt-2 flex items-center font-medium">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                Parsed from CLP
-              </p>
-            </div>
+           <!-- Empty State -->
+           <div id="dashboard-empty-state" class="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-900/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 mb-8 animate-fade-in">
+             <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+               <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+             </div>
+             <h3 class="text-lg font-bold mb-2">No EDI Data Loaded</h3>
+             <p class="text-slate-500 dark:text-slate-400 text-center max-w-sm">Upload an EDI file to view analytics dashboard and performance metrics.</p>
+             <button class="mt-6 btn-outline" onclick="switchView('upload')">Go to Upload</button>
+           </div>
 
-            <div class="card animate-fade-in animate-delay-100 hover:shadow-md transition-shadow relative overflow-hidden group">
-               <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" /></svg>
-              </div>
-              <div class="flex items-center text-slate-500 dark:text-slate-400 mb-4 transition-colors duration-300">
-                <div class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/40 flex items-center justify-center mr-3">
-                  <svg class="w-5 h-5 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V15"></path></svg>
-                </div>
-                <h3 class="font-medium text-slate-500 dark:text-slate-400">Total Billed</h3>
-              </div>
-              <h2 id="totalBilled" class="text-3xl font-bold">$0.00</h2>
-              <p class="text-sm text-red-500 dark:text-red-400 mt-2 flex items-center font-medium">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Gross Amount
-              </p>
-            </div>
+           <!-- Dashboard Content (hidden by default) -->
+           <div id="dashboard-content" class="hidden animate-fade-in">
+             <!-- File Metadata Card -->
+             <div id="dashboard-file-info" class="card mb-8 bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30">
+               <div class="flex flex-wrap items-center justify-between gap-6">
+                 <div class="flex items-center">
+                   <div id="transaction-icon-container" class="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-blue-500/20">
+                     <!-- Icon injected via JS -->
+                   </div>
+                   <div>
+                     <h4 id="info-filename" class="text-lg font-bold text-slate-800 dark:text-white leading-tight">--</h4>
+                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">File Metadata & Status</p>
+                   </div>
+                 </div>
+                 
+                 <div class="flex flex-wrap gap-8 items-center">
+                   <div>
+                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Transaction Type</p>
+                     <p id="info-type" class="text-sm font-semibold">--</p>
+                   </div>
+                   <div>
+                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Upload Time</p>
+                     <p id="info-time" class="text-sm font-semibold">--</p>
+                   </div>
+                   <div>
+                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Validation Status</p>
+                     <div id="info-status">--</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
 
-            <div class="card animate-fade-in animate-delay-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-               <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-16 h-16 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
-              </div>
-              <div class="flex items-center text-slate-500 dark:text-slate-400 mb-4 transition-colors duration-300">
-                <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900/40 flex items-center justify-center mr-3">
-                  <svg class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h3 class="font-medium text-slate-500 dark:text-slate-400">Total Paid</h3>
-              </div>
-              <h2 id="totalPaid" class="text-3xl font-bold">$0.00</h2>
-              <p class="text-sm text-green-600 dark:text-green-500 mt-2 flex items-center font-medium">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Net Payment
-              </p>
-            </div>
-
-            <div class="card animate-fade-in animate-delay-300 hover:shadow-md transition-shadow relative overflow-hidden group">
-               <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-16 h-16 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-              </div>
-              <div class="flex items-center text-slate-500 dark:text-slate-400 mb-4 transition-colors duration-300">
-                <div class="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/40 flex items-center justify-center mr-3">
-                  <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                </div>
-                <h3 class="font-medium text-slate-500 dark:text-slate-400">Patient Resp.</h3>
-              </div>
-              <h2 id="patientResp" class="text-3xl font-bold">$0.00</h2>
-              <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 flex items-center font-medium">
-                <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                Out of Pocket
-              </p>
-            </div>
-          </div>
-
+             <!-- Dynamic Stats Grid -->
+             <div id="dashboard-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+               <!-- Dynamic Cards injected via JS -->
+             </div>
+           </div>
           <!-- Table -->
-          <div class="card p-0 overflow-hidden animate-fade-in animate-delay-400">
+          <div class="card p-0 overflow-hidden animate-fade-in animate-delay-400 mt-8">
             <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center transition-colors duration-300">
               <h3 class="font-bold text-lg transition-colors duration-300">Recent Files</h3>
               <button class="text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors">View All</button>
@@ -178,48 +165,14 @@ document.querySelector('#app').innerHTML = `
                     <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800 group/list transition-colors duration-300">
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td class="px-6 py-4 flex items-center">
-                      <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                      <span class="font-medium text-slate-700 dark:text-slate-200">claim_batch_005.edi</span>
-                    </td>
-                    <td class="px-6 py-4 text-slate-600 dark:text-slate-300">837 Professional</td>
-                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400">2 mins ago</td>
-                    <td class="px-6 py-4"><span class="badge-error">3 Errors</span></td>
-                    <td class="px-6 py-4 text-right">
-                      <button class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition font-medium text-sm" onclick="switchView('validation')">View Report</button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td class="px-6 py-4 flex items-center">
-                      <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                      <span class="font-medium text-slate-700 dark:text-slate-200">remittance_502.edi</span>
-                    </td>
-                    <td class="px-6 py-4 text-slate-600 dark:text-slate-300">835 Payment</td>
-                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400">45 mins ago</td>
-                    <td class="px-6 py-4"><span class="badge-success">Valid</span></td>
-                    <td class="px-6 py-4 text-right">
-                      <button class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition font-medium text-sm" onclick="switchView('parsed')">Inspect</button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td class="px-6 py-4 flex items-center">
-                      <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                      <span class="font-medium text-slate-700 dark:text-slate-200">enrollment_feb.edi</span>
-                    </td>
-                    <td class="px-6 py-4 text-slate-600 dark:text-slate-300">834 Enrollment</td>
-                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400">2 hours ago</td>
-                    <td class="px-6 py-4"><span class="badge-warning">1 Warning</span></td>
-                    <td class="px-6 py-4 text-right">
-                      <button class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition font-medium text-sm" onclick="switchView('validation')">View Report</button>
-                    </td>
-                  </tr>
+                <tbody id="recent-files-tbody" class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800 group/list transition-colors duration-300">
+                  <!-- Dynamically populated from store -->
+                  <tr><td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
-       </section>
+        </section>
 
        <section id="view-upload" class="view-section hidden animate-fade-in text-center h-full flex flex-col justify-center max-w-2xl mx-auto py-12">
           <h2 class="text-3xl font-bold mb-2 transition-colors duration-300">Upload EDI File</h2>
@@ -265,112 +218,7 @@ document.querySelector('#app').innerHTML = `
          
          <div class="flex flex-col lg:flex-row gap-6">
             <div class="flex-1 card p-6 shadow-sm overflow-hidden bg-white dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
-               <ul class="space-y-2 text-sm font-mono tree-root">
-                 <li>
-                    <div class="flex items-center group cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg border border-transparent hover:border-slate-100 dark:hover:border-slate-600 transition-colors" onclick="window.showSegmentDetails('ISA')">
-                       <svg class="w-4 h-4 mr-2 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                       <span class="font-bold text-blue-700 dark:text-blue-400 mr-2 bg-blue-50 dark:bg-blue-900/30 px-1.5 rounded">ISA</span>
-                       <span class="text-slate-600 dark:text-slate-300">Interchange Control Header</span>
-                       
-                       <div class="relative group/tooltip inline-block ml-2" onclick="event.stopPropagation(); window.showSegmentDetails('ISA')">
-                          <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans border dark:border-slate-600">
-                             Interchange Control Header. Contains sender and receiver information.
-                          </div>
-                       </div>
-                    </div>
-                    <ul class="pl-8 mt-2 space-y-2 tree-vertical relative before:content-[''] before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-slate-200 dark:before:bg-slate-700">
-                       <li class="relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                          <div class="flex items-center group cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors" onclick="window.showSegmentDetails('GS')">
-                             <svg class="w-4 h-4 mr-2 text-slate-400 dark:text-slate-500 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                             <span class="font-bold text-teal-600 dark:text-teal-400 mr-2 bg-teal-50 dark:bg-teal-900/30 px-1.5 rounded">GS</span>
-                             <span class="text-slate-600 dark:text-slate-300">Functional Group Header</span>
-                             
-                             <div class="relative group/tooltip inline-block ml-2" onclick="event.stopPropagation(); window.showSegmentDetails('GS')">
-                               <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-teal-500 dark:hover:text-teal-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                               <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans border dark:border-slate-600">
-                                  Functional Group Header. Groups related transaction sets.
-                               </div>
-                             </div>
-                          </div>
-                          <ul class="pl-8 mt-2 space-y-2 tree-vertical relative before:content-[''] before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-slate-200 dark:before:bg-slate-700">
-                             <li class="relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                <div class="flex items-center group cursor-pointer p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg" onclick="window.showSegmentDetails('ST')">
-                                   <svg class="w-4 h-4 mr-2 text-slate-400 dark:text-slate-500 transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                   <span class="font-bold text-indigo-600 dark:text-indigo-400 mr-2 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 rounded">ST</span>
-                                   <span class="text-slate-600 dark:text-slate-300">Transaction Set Header <span class="text-xs text-slate-400 dark:text-slate-500 ml-2">(837)</span></span>
-                                   
-                                   <div class="relative group/tooltip inline-block ml-2" onclick="event.stopPropagation(); window.showSegmentDetails('ST')">
-                                     <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans border dark:border-slate-600">
-                                        Transaction Set Header. Identifies the transaction type.
-                                     </div>
-                                   </div>
-                                </div>
-                                <ul class="pl-8 mt-2 space-y-2 tree-vertical relative before:content-[''] before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-slate-200 dark:before:bg-slate-700">
-                                   <li class="relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                      <div class="flex items-center p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
-                                         <span class="font-bold text-slate-700 dark:text-slate-200 mr-2">Loop 2000A</span>
-                                         <span class="text-slate-600 dark:text-slate-400">Billing Provider Hierarchical Level</span>
-                                      </div>
-                                   </li>
-                                   <li class="relative before:content-[''] before:absolute before:-left-4 before:top-4 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                      <div class="flex items-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                                         <span class="font-bold text-slate-700 dark:text-slate-200 mr-2">Loop 2000B</span>
-                                         <span class="text-slate-600 dark:text-slate-400">Subscriber Hierarchical Level</span>
-                                      </div>
-                                      <ul class="pl-8 mt-2 space-y-1 tree-vertical relative before:content-[''] before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-slate-200 dark:before:bg-slate-700">
-                                        <li class="relative before:content-[''] before:absolute before:-left-4 before:top-3 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                          <div class="flex items-center p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded text-xs cursor-pointer group/line" onclick="window.showSegmentDetails('NM1')">
-                                            <span class="font-bold text-slate-600 dark:text-slate-400 w-12 mr-2">NM1*</span><span class="text-slate-500 dark:text-slate-500">IL*1*SMITH*JOHN*M***MI*123456789~</span>
-                                            
-                                            <div class="relative group/tooltip inline-block ml-2 hidden group-hover/line:inline-block" onclick="event.stopPropagation(); window.showSegmentDetails('NM1')">
-                                              <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans font-normal border dark:border-slate-600">
-                                                 Individual or Organization Name.
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </li>
-                                        <li class="relative before:content-[''] before:absolute before:-left-4 before:top-3 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                          <div class="flex items-center p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded text-xs cursor-pointer group/line" onclick="window.showSegmentDetails('N3')">
-                                            <span class="font-bold text-slate-600 dark:text-slate-400 w-12 mr-2">N3*</span><span class="text-slate-500 dark:text-slate-500">123 MAIN ST~</span>
-                                            
-                                            <div class="relative group/tooltip inline-block ml-2 hidden group-hover/line:inline-block" onclick="event.stopPropagation(); window.showSegmentDetails('N3')">
-                                              <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans font-normal border dark:border-slate-600">
-                                                 Address Information.
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </li>
-                                        <li class="relative before:content-[''] before:absolute before:-left-4 before:top-3 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                          <div class="flex items-center p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded text-xs bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 relative cursor-pointer group/line" onclick="window.showSegmentDetails('N4')">
-                                            <span class="absolute -left-1 hidden group-hover/line:block w-1 h-full bg-red-500 rounded-l"></span>
-                                            <span class="font-bold text-red-600 dark:text-red-400 w-12 mr-2">N4*</span><span class="text-slate-500 dark:text-slate-500">CHICAGO*IL*60601~</span>
-                                            <span class="badge-error ml-auto">Missing Element</span>
-                                            
-                                            <div class="relative group/tooltip inline-block ml-2 hidden group-hover/line:inline-block" onclick="event.stopPropagation(); window.showSegmentDetails('N4')">
-                                              <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                              <div class="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans font-normal border dark:border-slate-600">
-                                                 City, State, ZIP Code information.
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </li>
-                                        <li class="relative before:content-[''] before:absolute before:-left-4 before:top-3 before:w-4 before:h-px before:bg-slate-200 dark:before:bg-slate-700">
-                                          <div class="flex items-center p-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded text-xs cursor-pointer group/line" onclick="window.showSegmentDetails('CLM')">
-                                            <span class="font-bold text-slate-600 dark:text-slate-400 w-12 mr-2">CLM*</span><span class="text-slate-500 dark:text-slate-500">2238475*42590.25***11:B:1*Y*A*Y*I~</span>
-                                            
-                                            <div class="relative group/tooltip inline-block ml-2 hidden group-hover/line:inline-block" onclick="event.stopPropagation(); window.showSegmentDetails('CLM')">
-                                              <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                              <div class="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 dark:bg-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10 pointer-events-none text-center transform translate-y-2 group-hover/tooltip:translate-y-0 text-sans font-normal border dark:border-slate-600">
-                                                 Claim Information segment.
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </li>
-                                      </ul>
+               <ul class="space-y-2 text-sm font-mono tree-root"><li class="p-8 text-center text-slate-500 italic">No EDI data to display. Please upload a file first.</li></ul>
                                    </li>
                                 </ul>
                              </li>
@@ -447,35 +295,7 @@ document.querySelector('#app').innerHTML = `
                          <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Action</th>
                       </tr>
                   </thead>
-               <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-300 group cursor-pointer relative">
-                     <td class="px-6 py-4 whitespace-nowrap"><span class="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Error</span></td>
-                     <td class="px-6 py-4 font-mono font-medium whitespace-nowrap">N4</td>
-                     <td class="px-6 py-4 whitespace-nowrap">2000B</td>
-                     <td class="px-6 py-4 font-medium whitespace-nowrap">Missing N403 (Zip Code) when N401 is present.</td>
-                     <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="window.viewFix('N4', 'Missing N403 (Zip Code) when N401 is present.', '2000B', 'Error', this)" class="viewFixBtn text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-300">View Problem</button>
-                     </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-300 group cursor-pointer relative">
-                     <td class="px-6 py-4 whitespace-nowrap"><span class="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Error</span></td>
-                     <td class="px-6 py-4 font-mono font-medium whitespace-nowrap">SBR</td>
-                     <td class="px-6 py-4 whitespace-nowrap">2000B</td>
-                     <td class="px-6 py-4 font-medium whitespace-nowrap">Invalid value for SBR01 (Payer Responsibility Sequence Code).</td>
-                     <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="window.viewFix('SBR', 'Invalid value for SBR01 (Payer Responsibility Sequence Code).', '2000B', 'Error', this)" class="viewFixBtn text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-300">View Problem</button>
-                     </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-300 group cursor-pointer relative">
-                     <td class="px-6 py-4 whitespace-nowrap"><span class="bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Warning</span></td>
-                     <td class="px-6 py-4 font-mono font-medium whitespace-nowrap">DMG</td>
-                     <td class="px-6 py-4 whitespace-nowrap">2010BA</td>
-                     <td class="px-6 py-4 font-medium whitespace-nowrap">Subscriber birth date format is valid but older than 120 years.</td>
-                     <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="window.viewFix('DMG', 'Subscriber birth date format is valid but older than 120 years.', '2010BA', 'Warning', this)" class="viewFixBtn text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-300">View Problem</button>
-                     </td>
-                  </tr>
-               </tbody>
+               <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"><tr><td colspan="7" class="px-6 py-10 text-center text-slate-500 italic">No validation issues to report.</td></tr></tbody>
                 </table>
                 </div>
              </div>
@@ -691,6 +511,9 @@ document.querySelector('#app').innerHTML = `
 
 // Simple Router implementation
 window.switchView = function (viewId) {
+  // Sync UI with store before switching
+  window.updateUIFromStore();
+
   // Update view visibility
   document.querySelectorAll('.view-section').forEach(el => {
     el.classList.add('hidden')
@@ -879,32 +702,76 @@ if (dropZone) {
     const reader = new FileReader();
     reader.onload = function (e) {
       const ediContent = e.target.result;
-      window.currentUploadedFileContent = ediContent;
-      window.currentUploadedFileName = file.name;
+      
+      // Basic "Security" Validation (Content Sanity Check)
+      const firstSegment = ediContent.trim().substring(0, 3).toUpperCase();
+      const validHeaders = ['ISA', 'GS', 'ST'];
+      
+      if (!validHeaders.includes(firstSegment)) {
+        const errorEl = document.getElementById('upload-error');
+        if (errorEl) {
+          errorEl.innerText = "Invalid file content. Please upload a valid EDI file.";
+          errorEl.classList.remove('hidden');
+          errorEl.classList.add('animate-pulse');
+        }
+        loadingContent.classList.add('hidden');
+        uploadContent.classList.remove('hidden');
+        fileInput.value = '';
+        return;
+      }
 
+      // Populate Global Store
       const segmentsWithLines = window.getSegmentsWithLines(ediContent);
       const segments = segmentsWithLines.map(s => s.content);
-
       const transType = detectTransactionType(segments);
       const errors = validateEDI(segmentsWithLines, transType);
 
-      window.updateValidationReportUI(errors, file.name, transType, segmentsWithLines.length);
-      window.updateParsedDataUI(segmentsWithLines, transType, file.name, errors);
+      const newFileEntry = {
+        name: file.name,
+        type: transType,
+        time: new Date().toLocaleTimeString(),
+        status: errors.length > 0 ? `${errors.length} Errors` : 'Valid',
+        raw: ediContent,
+        segments: segmentsWithLines,
+        errors: errors
+      };
 
-      window.calculateCLPSummary(ediContent);
-      window.updateDashboardSummaryUI();
+      // Set current file and add to history
+      window.ediStore.currentFile = newFileEntry;
+      window.ediStore.uploadedFiles = [newFileEntry, ...window.ediStore.uploadedFiles.slice(0, 4)];
+      
+      // Persist history
+      localStorage.setItem('edi_files', JSON.stringify(window.ediStore.uploadedFiles));
+
+      // Trigger Centralized UI Update
+      window.updateUIFromStore();
 
       setTimeout(() => {
         loadingContent.classList.add('hidden');
         loadingContent.classList.remove('flex');
         uploadContent.classList.remove('hidden');
 
-        window.switchView('validation');
+        window.switchView('dashboard'); 
         fileInput.value = '';
       }, 1500);
     };
     reader.readAsText(file);
   }
+
+  // Centralized UI Update Function
+  window.updateUIFromStore = function() {
+    const { currentFile, uploadedFiles } = window.ediStore;
+    
+    // Update Dashboard (if we have a current file)
+    window.updateDashboardSummaryUI(currentFile?.raw, currentFile?.name, currentFile?.type, currentFile?.errors || []);
+    
+    // Update Detailed Views (always sync with current file or empty)
+    window.updateValidationReportUI(currentFile?.errors || [], currentFile?.name || "No File", currentFile?.type || "N/A", currentFile?.segments?.length || 0);
+    window.updateParsedDataUI(currentFile?.segments || [], currentFile?.type || "N/A", currentFile?.name || "No File", currentFile?.errors || []);
+    
+    // Update Recent Files Table (always from store)
+    window.updateRecentFilesUI_FromStore(uploadedFiles);
+  };
 }
 
 // EDI Segment Definitions
@@ -1059,6 +926,12 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
     }
   });
 
+  if (segmentsWithLines.length === 0) {
+    treeContainer.innerHTML = `<li class="p-8 text-center text-slate-500 italic">No EDI data to display. Please upload a file first.</li>`;
+    window.closeSegmentDetails();
+    return;
+  }
+
   const isaEntry = segmentsWithLines.find(s => s.content.startsWith('ISA')) || { content: 'ISA*', line: 1 };
   const gsEntry = segmentsWithLines.find(s => s.content.startsWith('GS')) || { content: 'GS*', line: 2 };
   const stEntry = segmentsWithLines.find(s => s.content.startsWith('ST')) || { content: 'ST*', line: 3 };
@@ -1082,9 +955,7 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
         </li>
     `;
 
-  if (segmentsWithLines.length > 0) {
-    window.showSegmentDetails(segmentsWithLines[0].content.split('*')[0] || 'ISA');
-  }
+  window.showSegmentDetails(segmentsWithLines[0].content.split('*')[0] || 'ISA');
 }
 
 window.showSegmentDetails = function (segment) {
@@ -1714,44 +1585,214 @@ window.animateValue = function (id, start, end, duration, isCurrency = false) {
   window.requestAnimationFrame(step);
 }
 
-window.calculateCLPSummary = function (ediText) {
+window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors = []) {
+  // Use store data if arguments are missing
+  if (!ediText && window.ediStore && window.ediStore.currentFile) {
+    const f = window.ediStore.currentFile;
+    ediText = f.raw;
+    fileName = f.name;
+    transType = f.type;
+    errors = f.errors;
+  }
+
+  const emptyState = document.getElementById('dashboard-empty-state');
+  const dashboardContent = document.getElementById('dashboard-content');
+  const badge = document.getElementById('dashboard-type-badge');
+  
+  if (!ediText) {
+    if (emptyState) emptyState.classList.remove('hidden');
+    if (dashboardContent) dashboardContent.classList.add('hidden');
+    if (badge) badge.classList.add('hidden');
+    return;
+  }
+
+  if (emptyState) emptyState.classList.add('hidden');
+  if (dashboardContent) dashboardContent.classList.remove('hidden');
+
+  // Update File Info Section
+  document.getElementById('info-filename').innerText = fileName || "--";
+  
+  let typeLabel = "Unknown EDI";
+  let badgeClass = "badge-neutral";
+  let iconHtml = "";
+
+  if (transType === '837') {
+    typeLabel = "837 Professional";
+    badgeClass = "badge-blue";
+    iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
+  } else if (transType === '835') {
+    typeLabel = "835 Payment";
+    badgeClass = "badge-success";
+    iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+  } else if (transType === '834') {
+    typeLabel = "834 Enrollment";
+    badgeClass = "badge-purple";
+    iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
+  }
+
+  document.getElementById('info-type').innerText = typeLabel;
+  document.getElementById('info-time').innerText = "Just now";
+  
+  const errCount = errors.filter(e => e.severity === 'Error').length;
+  const statusEl = document.getElementById('info-status');
+  if (errCount > 0) {
+    statusEl.innerHTML = `<span class="badge-error">${errCount} Errors</span>`;
+  } else {
+    statusEl.innerHTML = `<span class="badge-success">Valid</span>`;
+  }
+
+  if (badge) {
+    badge.innerText = typeLabel;
+    badge.className = `ml-3 px-2.5 py-0.5 rounded-full text-xs font-bold ${badgeClass}`;
+    badge.classList.remove('hidden');
+  }
+
+  const iconContainer = document.getElementById('transaction-icon-container');
+  if (iconContainer) {
+    iconContainer.innerHTML = iconHtml;
+    // Set icon background color based on type
+    if (transType === '837') iconContainer.className = "w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-blue-500/20";
+    if (transType === '835') iconContainer.className = "w-12 h-12 rounded-xl bg-green-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-green-500/20";
+    if (transType === '834') iconContainer.className = "w-12 h-12 rounded-xl bg-purple-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-purple-500/20";
+  }
+
+  // Render Transaction-Specific Cards
+  const cardsContainer = document.getElementById('dashboard-cards-container');
+  if (!cardsContainer) return;
+
   const segments = ediText.split("~").map(s => s.trim()).filter(Boolean);
+  
+  if (transType === '837') {
+    render837Dashboard(segments, cardsContainer);
+  } else if (transType === '835') {
+    render835Dashboard(segments, cardsContainer);
+  } else if (transType === '834') {
+    render834Dashboard(segments, cardsContainer);
+  }
+}
+
+function render837Dashboard(segments, container) {
   let totalClaims = 0;
   let totalBilled = 0;
-  let totalPaid = 0;
-  let totalPatientResponsibility = 0;
+  let totalServiceLines = 0;
+  let providers = new Set();
 
-  segments.forEach(segment => {
-    if (segment.startsWith("CLP*")) {
-      const parts = segment.split("*");
+  segments.forEach(seg => {
+    if (seg.startsWith("CLM*")) {
       totalClaims++;
-      totalBilled += parseFloat(parts[3] || 0);
-      totalPaid += parseFloat(parts[4] || 0);
-      totalPatientResponsibility += parseFloat(parts[5] || 0);
+      const parts = seg.split("*");
+      totalBilled += parseFloat(parts[2] || 0);
+    }
+    if (seg.startsWith("SV1*")) {
+      totalServiceLines++;
+    }
+    if (seg.startsWith("NM1*")) {
+      const parts = seg.split("*");
+      // 85 = Billing Provider, 71 = Attending Provider
+      if (parts[1] === "85" || parts[1] === "71" || parts[1] === "FA") {
+         providers.add(parts[3]);
+      }
     }
   });
 
-  const summary = {
-    totalClaims,
-    totalBilled,
-    totalPaid,
-    totalPatientResponsibility
-  };
+  container.innerHTML = `
+    ${createStatCard("Total Claims", totalClaims, "claimsCount", false, "blue")}
+    ${createStatCard("Billed Amount", totalBilled, "totalBilled", true, "blue")}
+    ${createStatCard("Service Lines", totalServiceLines, "svcLines", false, "teal")}
+    ${createStatCard("Providers", providers.size, "provCount", false, "indigo")}
+  `;
 
-  localStorage.setItem("claimSummary", JSON.stringify(summary));
-  return summary;
+  setTimeout(() => {
+    window.animateValue("claimsCount", 0, totalClaims, 1000, false);
+    window.animateValue("totalBilled", 0, totalBilled, 1000, true);
+    window.animateValue("svcLines", 0, totalServiceLines, 1000, false);
+    window.animateValue("provCount", 0, providers.size, 1000, false);
+  }, 100);
 }
 
-window.updateDashboardSummaryUI = function () {
-  const summaryStr = localStorage.getItem("claimSummary");
-  if (!summaryStr) return;
+function render835Dashboard(segments, container) {
+  let totalClaims = 0;
+  let totalBilled = 0;
+  let totalPaid = 0;
+  let patientResp = 0;
 
-  const summary = JSON.parse(summaryStr);
+  segments.forEach(seg => {
+    if (seg.startsWith("CLP*")) {
+      totalClaims++;
+      const parts = seg.split("*");
+      totalBilled += parseFloat(parts[3] || 0);
+      totalPaid += parseFloat(parts[4] || 0);
+      patientResp += parseFloat(parts[5] || 0);
+    }
+  });
 
-  window.animateValue("claimsCount", 0, summary.totalClaims, 1500, false);
-  window.animateValue("totalBilled", 0, summary.totalBilled, 1500, true);
-  window.animateValue("totalPaid", 0, summary.totalPaid, 1500, true);
-  window.animateValue("patientResp", 0, summary.totalPatientResponsibility, 1500, true);
+  container.innerHTML = `
+    ${createStatCard("Claims Paid", totalClaims, "paidCount", false, "green")}
+    ${createStatCard("Billed Amount", totalBilled, "totalBilled", true, "slate")}
+    ${createStatCard("Paid Amount", totalPaid, "totalPaid", true, "green")}
+    ${createStatCard("Patient Resp.", patientResp, "patientResp", true, "amber")}
+  `;
+
+  setTimeout(() => {
+    window.animateValue("paidCount", 0, totalClaims, 1000, false);
+    window.animateValue("totalBilled", 0, totalBilled, 1000, true);
+    window.animateValue("totalPaid", 0, totalPaid, 1000, true);
+    window.animateValue("patientResp", 0, patientResp, 1000, true);
+  }, 100);
+}
+
+function render834Dashboard(segments, container) {
+  let totalMembers = 0;
+  let newEnrollments = 0;
+  let terminations = 0;
+  let dependents = 0;
+
+  segments.forEach(seg => {
+    if (seg.startsWith("INS*")) {
+      totalMembers++;
+      const parts = seg.split("*");
+      // INS03: 021 = Addition, 024 = Terminate/De-enrollment
+      if (parts[3] === "021") newEnrollments++;
+      if (parts[3] === "024" || parts[3] === "025") terminations++;
+      // INS02: 18 = Self, 19 = Child, etc.
+      if (parts[2] !== "18") dependents++;
+    }
+  });
+
+  container.innerHTML = `
+    ${createStatCard("Total Members", totalMembers, "memberCount", false, "purple")}
+    ${createStatCard("New Enrollments", newEnrollments, "newEnrol", false, "green")}
+    ${createStatCard("Terminations", terminations, "termCount", false, "red")}
+    ${createStatCard("Dependents", dependents, "depCount", false, "indigo")}
+  `;
+
+  setTimeout(() => {
+    window.animateValue("memberCount", 0, totalMembers, 1000, false);
+    window.animateValue("newEnrol", 0, newEnrollments, 1000, false);
+    window.animateValue("termCount", 0, terminations, 1000, false);
+    window.animateValue("depCount", 0, dependents, 1000, false);
+  }, 100);
+}
+
+function createStatCard(label, value, id, isCurrency, color) {
+  let colorClass = "text-blue-600";
+  let borderClass = "border-l-blue-500";
+  
+  if (color === "green") { colorClass = "text-green-600"; borderClass = "border-l-green-500"; }
+  if (color === "purple") { colorClass = "text-purple-600"; borderClass = "border-l-purple-500"; }
+  if (color === "amber") { colorClass = "text-amber-600"; borderClass = "border-l-amber-500"; }
+  if (color === "red") { colorClass = "text-red-600"; borderClass = "border-l-red-500"; }
+  if (color === "teal") { colorClass = "text-teal-600"; borderClass = "border-l-teal-500"; }
+  if (color === "indigo") { colorClass = "text-indigo-600"; borderClass = "border-l-indigo-500"; }
+
+  return `
+    <div class="card shadow-sm border-l-4 ${borderClass} animate-fade-in">
+       <p class="text-slate-500 dark:text-slate-400 font-medium mb-1 text-sm">${label}</p>
+       <h3 id="${id}" class="text-2xl font-bold transition-all duration-300">
+         ${isCurrency ? '$0.00' : '0'}
+       </h3>
+    </div>
+  `;
 }
 
 window.runDashboardAnimations = function () {
@@ -1878,6 +1919,60 @@ window.downloadFixedFile = function() {
   a.click();
   window.URL.revokeObjectURL(url);
   document.body.removeChild(a);
+}
+
+window.updateRecentFilesUI_FromStore = function (files) {
+  const tbody = document.getElementById('recent-files-tbody');
+  if (!tbody) return;
+
+  // Clear existing rows
+  tbody.innerHTML = '';
+
+  if (files.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet</td></tr>`;
+    return;
+  }
+
+  files.forEach(file => {
+    const errCount = file.errors ? file.errors.filter(e => e.severity === 'Error').length : 0;
+    const warnCount = file.errors ? file.errors.filter(e => e.severity === 'Warning').length : 0;
+
+    let statusBadge = `<span class="badge-success">Valid</span>`;
+    if (errCount > 0) statusBadge = `<span class="badge-error">${errCount} Errors</span>`;
+    else if (warnCount > 0) statusBadge = `<span class="badge-warning">${warnCount} Warning</span>`;
+
+    let typeBadgeClass = "badge-neutral";
+    let typeLabel = "Unknown";
+    if (file.type === '837') { typeBadgeClass = "badge-blue"; typeLabel = "837 Professional"; }
+    if (file.type === '835') { typeBadgeClass = "badge-success"; typeLabel = "835 Payment"; }
+    if (file.type === '834') { typeBadgeClass = "badge-purple"; typeLabel = "834 Enrollment"; }
+
+    const row = document.createElement('tr');
+    row.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors animate-fade-in";
+    row.innerHTML = `
+      <td class="px-6 py-4 flex items-center">
+        <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span class="font-medium text-slate-700 dark:text-slate-200">${file.name}</span>
+      </td>
+      <td class="px-6 py-4"><span class="${typeBadgeClass} px-2 py-0.5 rounded-full text-[10px] font-bold">${typeLabel}</span></td>
+      <td class="px-6 py-4 text-slate-500 dark:text-slate-400">${file.time}</td>
+      <td class="px-6 py-4">${statusBadge}</td>
+      <td class="px-6 py-4 text-right">
+        <button class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition font-medium text-sm" onclick="window.switchViewToStoredFile('${file.name}')">Inspect</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Helper to switch to a historically uploaded file
+window.switchViewToStoredFile = function(fileName) {
+  const file = window.ediStore.uploadedFiles.find(f => f.name === fileName);
+  if (file) {
+    window.ediStore.currentFile = file;
+    window.updateUIFromStore();
+    window.switchView('dashboard');
+  }
 }
 
 // Initialize on first load
