@@ -234,7 +234,8 @@ document.querySelector('#app').innerHTML = `
               <p class="text-sm text-slate-500 dark:text-slate-500 mb-6">or</p>
               <button class="btn-primary shadow-lg shadow-blue-500/30">Browse Files</button>
               <input type="file" id="file-input" accept=".edi,.txt,.dat,.x12" class="hidden">
-              <p class="text-xs text-slate-400 dark:text-slate-500 mt-6 font-medium">Supports .edi, .txt up to 10MB</p>
+              <p id="upload-hint" class="text-xs text-slate-400 dark:text-slate-500 mt-6 font-medium">Supported formats: .edi, .txt, .dat, .x12</p>
+              <div id="upload-error" class="hidden mt-4 p-3 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium animate-fade-in"></div>
             </div>
             
             <div id="loading-content" class="hidden flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-blue-50/90 dark:bg-slate-900/90 rounded-2xl backdrop-blur-sm z-10 transition-all animate-fade-in">
@@ -837,6 +838,33 @@ if (dropZone) {
   function handleFiles(files) {
     if (!files || files.length === 0) return;
     const file = files[0];
+
+    // Validate file type
+    const allowedExtensions = ['.edi', '.txt', '.dat', '.x12'];
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!isValidExtension) {
+      const errorEl = document.getElementById('upload-error');
+      if (errorEl) {
+        errorEl.innerText = "Invalid file type. Please upload a valid EDI file (.edi, .txt, .dat, .x12).";
+        errorEl.classList.remove('hidden');
+        // Vibrate/Shake effect if supported, otherwise just show
+        errorEl.classList.add('animate-pulse');
+        setTimeout(() => {
+          errorEl.classList.add('hidden');
+          errorEl.classList.remove('animate-pulse');
+        }, 5000);
+      }
+      // Reset file input so same file can be picked again
+      const fileInput = document.getElementById('file-input');
+      if (fileInput) fileInput.value = '';
+      return;
+    }
+
+    // Hide any previous error
+    const errorEl = document.getElementById('upload-error');
+    if (errorEl) errorEl.classList.add('hidden');
 
     // Update UI with file details
     const fileNameEl = document.getElementById('loading-file-name');
