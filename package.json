@@ -15,6 +15,7 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
-    "esbuild": "^0.27.3"
+    "esbuild": "^0.27.3",
+    "firebase": "^12.10.0"
   }
 }
