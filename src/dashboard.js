@@ -101,47 +101,154 @@ document.querySelector('#app').innerHTML = `
              </button>
            </div>
 
-           <!-- Empty State -->
-           <div id="dashboard-empty-state" class="flex flex-col items-center justify-center py-20 bg-slate-50 dark:bg-slate-900/20 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 mb-8 animate-fade-in">
-             <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-               <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-             </div>
-             <h3 class="text-lg font-bold mb-2">No EDI Data Loaded</h3>
-             <p class="text-slate-500 dark:text-slate-400 text-center max-w-sm">Upload an EDI file to view analytics dashboard and performance metrics.</p>
-             <button class="mt-6 btn-outline" onclick="switchView('upload')">Go to Upload</button>
-           </div>
-
-           <!-- Dashboard Content (hidden by default) -->
-           <div id="dashboard-content" class="hidden animate-fade-in">
-             <!-- File Metadata Card -->
-             <div id="dashboard-file-info" class="card mb-8 bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30">
-               <div class="flex flex-wrap items-center justify-between gap-6">
-                 <div class="flex items-center">
-                   <div id="transaction-icon-container" class="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-blue-500/20">
-                     <!-- Icon injected via JS -->
+            <!-- Enhanced Empty State -->
+             <div id="dashboard-empty-state" class="flex flex-col items-center justify-center py-8 bg-gradient-to-br from-slate-50 to-blue-50/50 dark:from-slate-900 dark:to-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-lg mb-8 animate-fade-in px-6 min-h-[300px]">
+               <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 shadow-sm ring-1 ring-blue-500/20">
+                 <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+               </div>
+               <h2 class="text-2xl md:text-3xl font-black mb-2 text-slate-800 dark:text-white text-center tracking-tight">Welcome to HealthEDI Analyzer</h2>
+               <p class="text-slate-500 dark:text-slate-400 text-center max-w-lg mb-6 text-base leading-relaxed">Analyze healthcare EDI claims instantly. Validate errors, explore hierarchical structures, and get AI-powered insights in one place.</p>
+               
+               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 w-full max-w-2xl">
+                 <div class="flex items-center p-4 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:shadow-md hover:border-green-500/30 transition-all duration-300 group">
+                   <div class="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                     <svg class="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2-1 4-2 7-2 2.5 0 4.5 1 6 2a1 1 0 0 1 1 1v7z"/><path d="m9 12 2 2 4-4"/></svg>
                    </div>
-                   <div>
-                     <h4 id="info-filename" class="text-lg font-bold text-slate-800 dark:text-white leading-tight">--</h4>
-                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">File Metadata & Status</p>
-                   </div>
+                   <span class="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300">Detect validation errors</span>
                  </div>
-                 
-                 <div class="flex flex-wrap gap-8 items-center">
-                   <div>
-                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Transaction Type</p>
-                     <p id="info-type" class="text-sm font-semibold">--</p>
+                 <div class="flex items-center p-4 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:shadow-md hover:border-blue-500/30 transition-all duration-300 group">
+                   <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                     <svg class="w-4 h-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                    </div>
-                   <div>
-                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Upload Time</p>
-                     <p id="info-time" class="text-sm font-semibold">--</p>
+                   <span class="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300">View smart analytics</span>
+                 </div>
+                 <div class="flex items-center p-4 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:shadow-md hover:border-purple-500/30 transition-all duration-300 group">
+                   <div class="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                     <svg class="w-4 h-4 text-purple-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
                    </div>
-                   <div>
-                     <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-1">Validation Status</p>
-                     <div id="info-status">--</div>
+                   <span class="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300">Get AI explanations</span>
+                 </div>
+                 <div class="flex items-center p-4 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:shadow-md hover:border-teal-500/30 transition-all duration-300 group">
+                   <div class="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                     <svg class="w-4 h-4 text-teal-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                   </div>
+                   <span class="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300">Generate reports</span>
+                 </div>
+               </div>
+
+               <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 mb-2 w-full">
+                 <button class="btn-primary py-3 px-8 text-base flex items-center shadow-md shadow-blue-500/30 animate-bounce-subtle rounded-xl hover:scale-105 transition-transform duration-200 w-full sm:w-auto justify-center" onclick="switchView('upload')">
+                   <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                   Start Analyzing Now
+                 </button>
+                 <button class="px-8 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 text-slate-700 dark:text-slate-300 text-base shadow-sm hover:scale-105 transition-transform duration-200 w-full sm:w-auto justify-center" onclick="window.tryDemoFile()">
+                   Try with Demo Data
+                 </button>
+               </div>
+               <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-8 mt-2">Start by uploading your first EDI file or try demo data.</p>
+
+               <div class="w-full max-w-4xl border-t border-slate-100 dark:border-slate-800 pt-6">
+                 <div class="flex items-center justify-between relative px-4 md:px-10">
+                   <div class="absolute top-4 left-[10%] w-[80%] h-[4px] bg-slate-400 dark:bg-slate-500 rounded-full shadow-sm -translate-y-1/2 -z-0"></div>
+                   <div class="flex flex-col items-center gap-2 relative z-10 transition-all duration-300 group">
+                     <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/30 text-sm ring-4 ring-white dark:ring-slate-900 group-hover:scale-110 transition-transform">1</div>
+                     <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Upload</span>
+                   </div>
+                   <div class="flex flex-col items-center gap-2 relative z-10 transition-all duration-300 group">
+                     <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-white dark:ring-slate-900 group-hover:scale-110 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-transform">2</div>
+                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Parse</span>
+                   </div>
+                   <div class="flex flex-col items-center gap-2 relative z-10 transition-all duration-300 group">
+                     <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-white dark:ring-slate-900 group-hover:scale-110 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-transform">3</div>
+                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Validate</span>
+                   </div>
+                   <div class="flex flex-col items-center gap-2 relative z-10 transition-all duration-300 group">
+                     <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm ring-4 ring-white dark:ring-slate-900 group-hover:scale-110 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-transform">4</div>
+                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Summary</span>
                    </div>
                  </div>
                </div>
              </div>
+
+           <!-- Improved Dashboard Content (hidden by default) -->
+            <div id="dashboard-content" class="hidden animate-fade-in">
+              <!-- Top Metrics & Quick Actions -->
+              <div id="dashboard-overview-header" class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div class="card bg-gradient-to-br from-blue-600 to-indigo-700 text-white border-none shadow-xl shadow-blue-500/20 overflow-hidden relative group">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Total Files Processed</p>
+                    <h3 id="stat-total-files" class="text-4xl font-black">--</h3>
+                    <div class="mt-4 flex items-center text-xs text-blue-200">
+                      <span class="bg-blue-500/30 px-2 py-0.5 rounded-full mr-2">Lifetime</span>
+                      <span>Updated just now</span>
+                    </div>
+                  </div>
+                  <div class="card bg-white dark:bg-slate-800/80 flex flex-col justify-between border-slate-100 dark:border-slate-700">
+                    <div class="flex justify-between items-start">
+                      <p class="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Last File Status</p>
+                      <span id="stat-last-status-badge">--</span>
+                    </div>
+                    <h3 id="stat-last-status" class="text-2xl font-black mt-2 text-slate-800 dark:text-white">--</h3>
+                    <p class="text-xs text-slate-400 mt-2">Based on X12-5010 standards</p>
+                  </div>
+                  <div class="card bg-white dark:bg-slate-800/80 flex flex-col justify-between border-l-4 border-l-red-500 border-slate-100 dark:border-slate-700">
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">Validation Issues</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                      <h3 id="stat-error-count" class="text-4xl font-black text-red-500">--</h3>
+                      <span class="text-sm text-slate-400 font-bold uppercase">Errors</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Critical issues detected</p>
+                  </div>
+                </div>
+                <div class="card bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/50 flex flex-col justify-center gap-3 p-5">
+                  <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Quick Actions</p>
+                  <div class="flex flex-col gap-2">
+                    <button class="w-full text-left p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-sm font-bold flex items-center transition-all group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100 dark:hover:border-slate-600" onclick="switchView('upload')">
+                      <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mr-3 text-xs group-hover:scale-110 transition-transform">↑</span>
+                      Upload New
+                    </button>
+                    <button class="w-full text-left p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-sm font-bold flex items-center transition-all group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100 dark:hover:border-slate-600" onclick="switchView('validation')">
+                      <span class="w-8 h-8 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center mr-3 text-xs group-hover:scale-110 transition-transform">!</span>
+                      View Errors
+                    </button>
+                    <button class="w-full text-left p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-700 text-sm font-bold flex items-center transition-all group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100 dark:hover:border-slate-600" onclick="switchView('assistant')">
+                      <span class="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-lg flex items-center justify-center mr-3 text-xs group-hover:scale-110 transition-transform">AI</span>
+                      AI Assistant
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- File Metadata Card -->
+              <div id="dashboard-file-info" class="card mb-8 bg-blue-50/30 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/20 ring-1 ring-blue-500/5">
+                <div class="flex flex-wrap items-center justify-between gap-6">
+                  <div class="flex items-center">
+                    <div id="transaction-icon-container" class="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mr-5 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10">
+                      <!-- Icon injected via JS -->
+                    </div>
+                    <div>
+                      <p class="text-[10px] uppercase tracking-widest font-black text-blue-600 dark:text-blue-400 mb-1">Current File</p>
+                      <h4 id="info-filename" class="text-xl font-black text-slate-800 dark:text-white leading-tight">--</h4>
+                    </div>
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-10 items-center">
+                    <div>
+                      <p class="text-[10px] uppercase tracking-wider font-black text-slate-400 dark:text-slate-500 mb-1">Type</p>
+                      <p id="info-type" class="text-sm font-bold">--</p>
+                    </div>
+                    <div>
+                      <p class="text-[10px] uppercase tracking-wider font-black text-slate-400 dark:text-slate-500 mb-1">Uploaded At</p>
+                      <p id="info-time" class="text-sm font-bold">--</p>
+                    </div>
+                    <div>
+                      <p class="text-[10px] uppercase tracking-wider font-black text-slate-400 dark:text-slate-500 mb-1">Health Score</p>
+                      <div id="info-status">--</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
              <!-- Dynamic Stats Grid -->
              <div id="dashboard-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -158,16 +265,17 @@ document.querySelector('#app').innerHTML = `
               <table class="w-full min-w-[700px] text-left text-sm whitespace-nowrap">
                 <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-medium transition-colors duration-300">
                   <tr>
-                    <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">File Name</th>
-                    <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Transaction Type</th>
-                    <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Upload Time</th>
-                    <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Status</th>
-                    <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-right">Action</th>
-                  </tr>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">File Name</th>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Transaction</th>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Upload Time</th>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Status</th>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Issues</th>
+                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-right">Action</th>
+                    </tr>
                 </thead>
                 <tbody id="recent-files-tbody" class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800 group/list transition-colors duration-300">
                   <!-- Dynamically populated from store -->
-                  <tr><td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet</td></tr>
+                  <tr><td colspan="6" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet</td></tr>
                 </tbody>
               </table>
             </div>
@@ -762,6 +870,36 @@ if (dropZone) {
   window.updateUIFromStore = function() {
     const { currentFile, uploadedFiles } = window.ediStore;
     
+    // Toggle Visibility based on file count
+    const emptyState = document.getElementById('dashboard-empty-state');
+    const contentArea = document.getElementById('dashboard-content');
+    
+    if (uploadedFiles.length === 0) {
+      if (emptyState) emptyState.classList.remove('hidden');
+      if (contentArea) contentArea.classList.add('hidden');
+    } else {
+      if (emptyState) emptyState.classList.add('hidden');
+      if (contentArea) contentArea.classList.remove('hidden');
+    }
+
+    // Update Global Stats
+    const totalFilesEl = document.getElementById('stat-total-files');
+    if (totalFilesEl) totalFilesEl.innerText = uploadedFiles.length;
+
+    if (currentFile) {
+        // Last File Status Stats
+        const lastStatusEl = document.getElementById('stat-last-status');
+        const lastStatusBadgeEl = document.getElementById('stat-last-status-badge');
+        const errorCountEl = document.getElementById('stat-error-count');
+
+        if (lastStatusEl) lastStatusEl.innerText = currentFile.status === 'Valid' ? 'Healthy' : 'Needs Repair';
+        if (lastStatusBadgeEl) {
+            lastStatusBadgeEl.className = currentFile.status === 'Valid' ? 'badge-success' : 'badge-error';
+            lastStatusBadgeEl.innerText = currentFile.status === 'Valid' ? '✔' : '✘';
+        }
+        if (errorCountEl) errorCountEl.innerText = currentFile.errors ? currentFile.errors.length : 0;
+    }
+    
     // Update Dashboard (if we have a current file)
     window.updateDashboardSummaryUI(currentFile?.raw, currentFile?.name, currentFile?.type, currentFile?.errors || []);
     
@@ -771,6 +909,48 @@ if (dropZone) {
     
     // Update Recent Files Table (always from store)
     window.updateRecentFilesUI_FromStore(uploadedFiles);
+  };
+
+  // Demo Data Injection
+  window.tryDemoFile = function() {
+    const mockData = {
+      name: "sample_837_claims_batch.edi",
+      type: "837P",
+      time: "Just Now",
+      status: "12 Errors",
+      raw: "ISA*00*...ST*837*...",
+      segments: [
+        { content: "ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *230318*1458*^*00501*000000905*1*T*:", line: 1 },
+        { content: "GS*HC*SENDERID*RECEIVERID*20230318*1458*1*X*005010X222A1", line: 2 },
+        { content: "ST*837*0001*005010X222A1", line: 3 },
+        { content: "BHT*0019*00*0123*20230318*1458*CH", line: 4 },
+        { content: "NM1*41*2*PAYER NAME*****46*PAYERID", line: 5 },
+        { content: "NM1*85*2*PROVIDER ORG*****XX*1234567890", line: 6 },
+        { content: "N3*123 MAIN ST", line: 7 },
+        { content: "N4*CHICAGO*IL*60601", line: 8 }
+      ],
+      errors: [
+        { severity: "High", line: 4, segment: "BHT", loop: "Header", description: "Missing required reference identification mapping (BHT03)", suggestion: "Ensure BHT03 contains the unique reference ID", action: "Fix" },
+        { severity: "Medium", line: 7, segment: "N3", loop: "2010AA", description: "Address line exceeds standard length for some payers", suggestion: "Truncate or split address", action: "Analyze" },
+        { severity: "Critical", line: 6, segment: "NM1", loop: "2010AA", description: "Invalid NPI checksum for element NM109", suggestion: "Verify the 10-digit NPI number", action: "Fix" }
+      ]
+    };
+
+    window.ediStore.currentFile = mockData;
+    window.ediStore.uploadedFiles = [mockData, ...window.ediStore.uploadedFiles.filter(f => f.name !== mockData.name).slice(0, 4)];
+    localStorage.setItem('edi_files', JSON.stringify(window.ediStore.uploadedFiles));
+    
+    // Animate transition
+    const emptyState = document.getElementById('dashboard-empty-state');
+    if (emptyState) {
+        emptyState.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+            window.updateUIFromStore();
+            window.switchView('dashboard');
+        }, 300);
+    } else {
+        window.updateUIFromStore();
+    }
   };
 }
 
@@ -1612,19 +1792,26 @@ window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors
   // Update File Info Section
   document.getElementById('info-filename').innerText = fileName || "--";
   
-  let typeLabel = "Unknown EDI";
+  let typeLabel = transType ? transType : "837P";
   let badgeClass = "badge-neutral";
   let iconHtml = "";
 
-  if (transType === '837') {
+  let detectType = String(transType || '');
+  if (!detectType && fileName) {
+    if (fileName.includes('837')) detectType = '837';
+    else if (fileName.includes('835')) detectType = '835';
+    else if (fileName.includes('834')) detectType = '834';
+  }
+
+  if (detectType.includes('837')) {
     typeLabel = "837 Professional";
     badgeClass = "badge-blue";
     iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
-  } else if (transType === '835') {
+  } else if (detectType.includes('835')) {
     typeLabel = "835 Payment";
     badgeClass = "badge-success";
     iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-  } else if (transType === '834') {
+  } else if (detectType.includes('834')) {
     typeLabel = "834 Enrollment";
     badgeClass = "badge-purple";
     iconHtml = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`;
@@ -1929,7 +2116,7 @@ window.updateRecentFilesUI_FromStore = function (files) {
   tbody.innerHTML = '';
 
   if (files.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-500 italic">No files uploaded yet. Click "Upload File" to get started.</td></tr>`;
     return;
   }
 
@@ -1937,28 +2124,66 @@ window.updateRecentFilesUI_FromStore = function (files) {
     const errCount = file.errors ? file.errors.filter(e => e.severity === 'Error').length : 0;
     const warnCount = file.errors ? file.errors.filter(e => e.severity === 'Warning').length : 0;
 
-    let statusBadge = `<span class="badge-success">Valid</span>`;
-    if (errCount > 0) statusBadge = `<span class="badge-error">${errCount} Errors</span>`;
-    else if (warnCount > 0) statusBadge = `<span class="badge-warning">${warnCount} Warning</span>`;
+    let statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+      Healthy
+    </span>`;
+    
+    if (errCount > 0) {
+      statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+        Critical
+      </span>`;
+    } else if (warnCount > 0) {
+      statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+        Warning
+      </span>`;
+    }
 
-    let typeBadgeClass = "badge-neutral";
-    let typeLabel = "Unknown";
-    if (file.type === '837') { typeBadgeClass = "badge-blue"; typeLabel = "837 Professional"; }
-    if (file.type === '835') { typeBadgeClass = "badge-success"; typeLabel = "835 Payment"; }
-    if (file.type === '834') { typeBadgeClass = "badge-purple"; typeLabel = "834 Enrollment"; }
+    let typeBadgeClass = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300";
+    let typeLabel = file.type ? file.type : "Unknown";
+
+    let detectType = String(file.type || "");
+    if (!detectType && file.name) {
+      if (file.name.includes("837")) detectType = "837";
+      else if (file.name.includes("835")) detectType = "835";
+      else if (file.name.includes("834")) detectType = "834";
+    }
+
+    if (detectType.includes('837')) { typeBadgeClass = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"; typeLabel = "837 Professional"; }
+    else if (detectType.includes('835')) { typeBadgeClass = "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"; typeLabel = "835 Payment"; }
+    else if (detectType.includes('834')) { typeBadgeClass = "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"; typeLabel = "834 Enrollment"; }
 
     const row = document.createElement('tr');
-    row.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors animate-fade-in";
+    row.className = "hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors animate-fade-in group";
     row.innerHTML = `
-      <td class="px-6 py-4 flex items-center">
-        <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-        <span class="font-medium text-slate-700 dark:text-slate-200">${file.name}</span>
+      <td class="px-6 py-4">
+        <div class="flex items-center">
+            <div class="w-8 h-8 rounded bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <span class="font-medium text-slate-700 dark:text-slate-200">${file.name}</span>
+        </div>
       </td>
-      <td class="px-6 py-4"><span class="${typeBadgeClass} px-2 py-0.5 rounded-full text-[10px] font-bold">${typeLabel}</span></td>
-      <td class="px-6 py-4 text-slate-500 dark:text-slate-400">${file.time}</td>
+      <td class="px-6 py-4"><span class="${typeBadgeClass} px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider">${typeLabel}</span></td>
+      <td class="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm italic">${file.time}</td>
       <td class="px-6 py-4">${statusBadge}</td>
+      <td class="px-6 py-4">
+        <div class="flex items-center space-x-2">
+            <span class="text-sm font-semibold ${errCount > 0 ? 'text-red-500' : 'text-slate-400'}">${errCount}</span>
+            <span class="text-[10px] text-slate-400 uppercase">Errors</span>
+        </div>
+      </td>
       <td class="px-6 py-4 text-right">
-        <button class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition font-medium text-sm" onclick="window.switchViewToStoredFile('${file.name}')">Inspect</button>
+        <div class="flex items-center justify-end space-x-3">
+            <button class="text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="View Summary" onclick="window.switchViewToStoredFile('${file.name}')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            </button>
+            <button class="btn-primary opacity-100 transition hover:scale-105 px-4 py-1.5 text-xs font-bold rounded-lg shadow-sm" onclick="window.handleInspectClick('${file.name}')">
+                Inspect
+            </button>
+        </div>
       </td>
     `;
     tbody.appendChild(row);
@@ -1974,6 +2199,66 @@ window.switchViewToStoredFile = function(fileName) {
     window.switchView('dashboard');
   }
 }
+
+window.handleInspectClick = function(fileName) {
+  console.log("Inspect clicked:", fileName);
+  
+  // Find file in store to get raw data
+  const file = window.ediStore.uploadedFiles.find(f => f.name === fileName);
+  const ediText = file ? file.raw : "";
+  
+  // store selected file
+  localStorage.setItem("selectedFileName", fileName);
+  localStorage.setItem("selectedFileData", ediText || "");
+  
+  // SWITCH VIEW (IMPORTANT)
+  window.switchView("validation");
+
+  // LOAD DATA INTO UI
+  if (window.updateDashboardSummaryUI) {
+    window.updateDashboardSummaryUI(ediText, fileName);
+  }
+
+  // AUTO SCROLL (small delay for smooth UX)
+  setTimeout(() => {
+    const reportSection = document.querySelector("#view-validation");
+    if (reportSection) {
+      reportSection.scrollIntoView({ behavior: "smooth" });
+    }
+  }, 200);
+
+  // HIGHLIGHT selected file
+  window.highlightSelectedFile(fileName);
+};
+
+window.highlightSelectedFile = function(fileName) {
+  document.querySelectorAll("#recent-files-tbody tr").forEach(row => {
+    row.classList.remove("bg-blue-50", "dark:bg-blue-900/20");
+  });
+
+  const rows = document.querySelectorAll("#recent-files-tbody tr");
+  rows.forEach(row => {
+    if (row.innerText.includes(fileName)) {
+      row.classList.add("bg-blue-50", "dark:bg-blue-900/20");
+    }
+  });
+};
+
+window.addEventListener("load", () => {
+  const fileName = localStorage.getItem("selectedFileName");
+  const ediText = localStorage.getItem("selectedFileData");
+
+  if (fileName && ediText) {
+    console.log("Loading selected file:", fileName);
+
+    // call existing function
+    if (window.updateDashboardSummaryUI) {
+      window.updateDashboardSummaryUI(ediText, fileName);
+    }
+  } else {
+    console.log("No selected file found");
+  }
+});
 
 // Initialize on first load
 document.addEventListener('DOMContentLoaded', () => {
