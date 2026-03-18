@@ -489,60 +489,170 @@ document.querySelector('#app').innerHTML = `
        </section>
        
        <section id="view-summary" class="view-section hidden animate-fade-in max-w-5xl mx-auto py-8">
-         <div class="flex justify-between items-end mb-6">
-            <div>
-              <h2 class="text-2xl font-bold transition-colors">837 Claims Summary</h2>
-              <p class="text-slate-500 text-sm mt-1">Aggregated insights for Claim Batch 005</p>
-            </div>
+
+         <!-- Header with dynamic file info -->
+         <div class="flex justify-between items-start mb-6 flex-wrap gap-4">
+           <div>
+             <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest font-black mb-1">Summary Report</p>
+             <h2 id="summary-title" class="text-2xl font-bold transition-colors">EDI Claims Summary</h2>
+             <p id="summary-subtitle" class="text-slate-500 dark:text-slate-400 text-sm mt-1">No file loaded yet. Upload a file to see detailed insights.</p>
+           </div>
+           <div id="summary-file-meta" class="flex flex-wrap gap-4 items-center text-sm hidden">
+             <div class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-mono text-xs">
+               📄 <span id="summary-filename">--</span>
+             </div>
+             <div class="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-700 dark:text-blue-400 font-bold text-xs">
+               🏷️ <span id="summary-filetype">--</span>
+             </div>
+             <div class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 text-xs">
+               🕐 <span id="summary-filetime">--</span>
+             </div>
+           </div>
          </div>
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card bg-blue-600 text-white shadow-lg shadow-blue-500/30">
-               <p class="text-blue-100 font-medium mb-1">Total Claim Amount</p>
-               <h3 class="text-3xl font-bold">$42,590.25</h3>
-            </div>
-            <div class="card shadow-sm border-l-4 border-l-green-500">
-               <p class="text-slate-500 dark:text-slate-400 font-medium mb-1 text-sm">Total Claims</p>
-               <h3 class="text-3xl font-bold">124</h3>
-            </div>
-            <div class="card shadow-sm border-l-4 border-l-teal-500">
-               <p class="text-slate-500 dark:text-slate-400 font-medium mb-1 text-sm">Unique Providers</p>
-               <h3 class="text-3xl font-bold">12</h3>
-            </div>
+
+         <!-- Current File Insights Section Header -->
+         <h3 class="text-lg font-semibold mt-4 mb-2">
+           Current File Insights
+         </h3>
+         <p class="text-xs text-gray-500 mb-3">
+           Based on selected EDI file
+         </p>
+
+         <!-- Dynamic Metric Cards -->
+         <div id="summary-cards" class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-3">
+           <div class="card bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 border-none col-span-1 md:col-span-1">
+             <p class="text-blue-100 font-medium text-sm mb-1">Total Issues</p>
+             <h3 id="summary-total-errors" class="text-3xl font-black">--</h3>
+             <p class="text-blue-200 text-xs mt-2">Errors + Warnings + Info</p>
+           </div>
+           <div class="card shadow-sm border-l-4 border-l-red-500">
+             <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Errors</p>
+             <h3 id="summary-critical-count" class="text-3xl font-black text-red-500">--</h3>
+             <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Critical / High</p>
+           </div>
+           <div class="card shadow-sm border-l-4 border-l-yellow-400">
+             <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Warnings</p>
+             <h3 id="summary-warn-count" class="text-3xl font-black text-yellow-500">--</h3>
+             <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Medium severity</p>
+           </div>
+           <div class="card shadow-sm border-l-4 border-l-blue-400">
+             <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Info</p>
+             <h3 id="summary-segments-count" class="text-3xl font-black text-blue-500">--</h3>
+             <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Low severity</p>
+           </div>
          </div>
-         <div class="card p-0 shadow-sm overflow-hidden">
-            <h3 class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b font-bold transition-colors">Top Providers by Volume</h3>
-            <div class="p-6">
-               <div class="space-y-4">
-                  <div>
-                     <div class="flex justify-between text-sm mb-1">
-                        <span class="font-semibold">General Hospital Medical Center</span>
-                        <span class="font-mono text-blue-600 dark:text-blue-400">$18,450.00</span>
-                     </div>
-                     <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3">
-                        <div class="bg-blue-600 h-3 rounded-full" style="width: 45%"></div>
-                     </div>
-                  </div>
-                  <div>
-                     <div class="flex justify-between text-sm mb-1">
-                        <span class="font-semibold">Dr. Smith Clinic</span>
-                        <span class="font-mono text-teal-600 dark:text-teal-400">$12,120.50</span>
-                     </div>
-                     <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3">
-                        <div class="bg-teal-500 h-3 rounded-full" style="width: 32%"></div>
-                     </div>
-                  </div>
-                  <div>
-                     <div class="flex justify-between text-sm mb-1">
-                        <span class="font-semibold">Westside Cardiology</span>
-                        <span class="font-mono text-indigo-600 dark:text-indigo-400">$8,200.75</span>
-                     </div>
-                     <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3">
-                        <div class="bg-indigo-500 h-3 rounded-full" style="width: 20%"></div>
-                     </div>
-                  </div>
+         <p class="text-xs text-slate-400 dark:text-slate-500 mb-6 italic">✓ Summary data is synchronized with validation report</p>
+
+         <!-- Type-specific insights block -->
+         <div id="summary-type-insights" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 hidden">
+           <!-- Injected via JS based on file type -->
+         </div>
+
+         <!-- Two-column bottom section -->
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+           <!-- Validation Summary -->
+           <div class="card p-0 shadow-sm overflow-hidden">
+             <h3 class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 font-bold text-sm uppercase tracking-wider transition-colors">Validation Summary</h3>
+             <div class="p-5 space-y-3" id="summary-validation-list">
+               <div class="flex items-center justify-between text-sm py-2 border-b border-slate-100 dark:border-slate-700">
+                 <span class="flex items-center gap-2 text-slate-500">
+                   <span class="w-4 h-4 inline-flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xs">✔</span>
+                   Valid Segments
+                 </span>
+                 <span id="summary-valid-segments" class="font-bold text-green-600 dark:text-green-400">--</span>
                </div>
-            </div>
+               <div class="flex items-center justify-between text-sm py-2 border-b border-slate-100 dark:border-slate-700">
+                 <span class="flex items-center gap-2 text-slate-500">
+                   <span class="w-4 h-4 inline-flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-xs">✕</span>
+                   Invalid Segments
+                 </span>
+                 <span id="summary-invalid-segments" class="font-bold text-red-500">--</span>
+               </div>
+               <div class="flex items-center justify-between text-sm py-2">
+                 <span class="flex items-center gap-2 text-slate-500">
+                   <span class="w-4 h-4 inline-flex items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-xs">!</span>
+                   Missing Fields
+                 </span>
+                 <span id="summary-missing-fields" class="font-bold text-yellow-600 dark:text-yellow-400">--</span>
+               </div>
+             </div>
+           </div>
+
+           <!-- Top Error Breakdown -->
+           <div class="card p-0 shadow-sm overflow-hidden">
+             <h3 class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 font-bold text-sm uppercase tracking-wider transition-colors">Top Errors</h3>
+             <div id="summary-error-list" class="p-5 space-y-3">
+               <p class="text-slate-400 text-sm italic">No errors found</p>
+             </div>
+           </div>
          </div>
+
+         <!-- AI Insight Block -->
+         <div id="summary-ai-insight-block" class="card border-l-4 border-l-teal-500 bg-teal-50/40 dark:bg-teal-900/10 shadow-sm">
+           <div class="flex items-start gap-4">
+             <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 shadow-sm">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+             </div>
+             <div>
+               <p class="text-[10px] uppercase tracking-widest font-black text-teal-600 dark:text-teal-400 mb-1">AI Insight</p>
+               <p id="ai-insight-text" class="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                 Analyzing validation data...
+               </p>
+             </div>
+           </div>
+         </div>
+
+         <!-- Overall Analytics Section -->
+         <div class="mt-8 mb-4">
+           <h3 class="text-lg font-semibold mt-6 mb-2">
+             Overall Analytics
+           </h3>
+           <p class="text-xs text-gray-500 mb-3">
+             Cumulative (till date) across all uploaded files
+           </p>
+
+           <!-- globalStats Cards -->
+           <div id="summary-global-cards" class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+             <div class="card shadow-sm border-l-4 border-l-indigo-500">
+               <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Total Files</p>
+               <h3 id="global-total-files" class="text-3xl font-black text-indigo-600">--</h3>
+               <p class="text-xs text-slate-400 mt-1">Processed</p>
+             </div>
+             <div class="card shadow-sm border-l-4 border-l-red-400">
+               <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Total Issues</p>
+               <h3 id="global-total-errors" class="text-3xl font-black text-red-500">--</h3>
+               <p class="text-xs text-slate-400 mt-1">Cumulative errors</p>
+             </div>
+             <div class="card shadow-sm border-l-4 border-l-teal-400">
+               <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Total Segments</p>
+               <h3 id="global-total-segments" class="text-3xl font-black text-teal-600">--</h3>
+               <p class="text-xs text-slate-400 mt-1">Cumulative parsed</p>
+             </div>
+             <div class="card shadow-sm border-l-4 border-l-emerald-500">
+               <p class="text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Total Claim Amount</p>
+               <h3 id="global-total-amount" class="text-3xl font-black text-emerald-600">--</h3>
+               <p class="text-xs text-slate-400 mt-1">From BPR segments</p>
+             </div>
+           </div>
+
+           <!-- Charts -->
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div class="card p-5 shadow-sm">
+               <p class="text-xs uppercase tracking-wider font-black text-slate-400 dark:text-slate-500 mb-4">File Type Distribution</p>
+               <div class="h-52 flex items-center justify-center">
+                 <canvas id="fileTypeChart"></canvas>
+               </div>
+             </div>
+             <div class="card p-5 shadow-sm">
+               <p class="text-xs uppercase tracking-wider font-black text-slate-400 dark:text-slate-500 mb-4">Valid vs Error Segments</p>
+               <div class="h-52 flex items-center justify-center">
+                 <canvas id="errorChart"></canvas>
+               </div>
+             </div>
+           </div>
+         </div>
+
        </section>
 
         <section id="view-assistant" class="view-section hidden animate-fade-in max-w-4xl mx-auto py-4 h-[calc(100vh-8rem)] flex flex-col">
@@ -674,6 +784,11 @@ window.switchView = function (viewId) {
   // Trigger animations if switching to dashboard
   if (viewId === 'dashboard') {
     window.runDashboardAnimations();
+  }
+
+  // Populate summary page when navigating to it
+  if (viewId === 'summary') {
+    window.updateSummaryUI();
   }
 }
 
@@ -2285,3 +2400,201 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
   }, 1200);
 });
+
+window.updateSummaryUI = function() {
+  const file = window.ediStore && window.ediStore.currentFile;
+
+  // --- Header ---
+  const title = document.getElementById('summary-title');
+  const subtitle = document.getElementById('summary-subtitle');
+  const fileMeta = document.getElementById('summary-file-meta');
+
+  if (!file || !file.raw) {
+    if (title) title.innerText = 'EDI Claims Summary';
+    if (subtitle) subtitle.innerText = 'No file loaded yet. Upload a file to see detailed insights.';
+    if (fileMeta) fileMeta.classList.add('hidden');
+    return;
+  }
+
+  // Detect type
+  let detectType = String(file.type || '');
+  if (!detectType && file.name) {
+    if (file.name.includes('837')) detectType = '837';
+    else if (file.name.includes('835')) detectType = '835';
+    else if (file.name.includes('834')) detectType = '834';
+  }
+  const typeLabel = detectType.includes('837') ? '837 Professional' : detectType.includes('835') ? '835 Payment' : detectType.includes('834') ? '834 Enrollment' : 'Unknown EDI';
+
+  if (title) title.innerText = typeLabel + ' Summary';
+  if (subtitle) subtitle.innerText = 'Aggregated insights for: ' + (file.name || 'Unknown file');
+
+  // File meta badges
+  if (fileMeta) fileMeta.classList.remove('hidden');
+  const fnEl = document.getElementById('summary-filename'); if (fnEl) fnEl.innerText = file.name || '--';
+  const ftEl = document.getElementById('summary-filetype'); if (ftEl) ftEl.innerText = typeLabel;
+  const tmEl = document.getElementById('summary-filetime'); if (tmEl) tmEl.innerText = file.time || 'Unknown';
+
+  // --- Metric Cards (normalized severity — match Validation Report EXACTLY) ---
+  const issues = file.errors || [];
+  console.log("Issues:", issues); // debug trace
+
+  const errorCount = issues.filter(i => (i.severity || "").toUpperCase().trim() === "ERROR" || (i.severity || "").toUpperCase().trim() === "CRITICAL" || (i.severity || "").toUpperCase().trim() === "HIGH").length;
+  const warningCount = issues.filter(i => (i.severity || "").toUpperCase().trim() === "WARNING" || (i.severity || "").toUpperCase().trim() === "MEDIUM").length;
+  const infoCount = issues.filter(i => (i.severity || "").toUpperCase().trim() === "INFO" || (i.severity || "").toUpperCase().trim() === "LOW").length;
+
+  const totalIssues = errorCount + warningCount + infoCount;
+  const ediText = file.raw || '';
+  const totalSegments = ediText ? ediText.split('~').filter(s => s.trim().length > 0).length : (file.segments ? file.segments.length : 0);
+
+  const el = id => document.getElementById(id);
+  if (el('summary-total-errors')) el('summary-total-errors').innerText = totalIssues;
+  if (el('summary-critical-count')) el('summary-critical-count').innerText = errorCount;
+  if (el('summary-warn-count')) el('summary-warn-count').innerText = warningCount;
+  if (el('summary-segments-count')) el('summary-segments-count').innerText = infoCount;
+
+  // --- Real Data: BPR Claim Amount ---
+  let totalClaimAmount = 0;
+  if (ediText && ediText.includes('BPR')) {
+    const bprMatch = ediText.match(/BPR[^*]*\*[^*]*\*([^*]*)/);
+    if (bprMatch && !isNaN(bprMatch[1]) && bprMatch[1].trim().length > 0) {
+      totalClaimAmount = parseFloat(bprMatch[1]);
+    }
+  }
+
+  // --- Global Stats tracking ---
+  const sessionProcessedKey = `processed_${file.name}_${file.time || 'unknown'}`;
+  if (!sessionStorage.getItem(sessionProcessedKey)) {
+    let globalStats = JSON.parse(localStorage.getItem('globalStats') || '{"totalFiles":0,"totalErrors":0,"totalSegments":0,"totalAmount":0}');
+    globalStats.totalFiles += 1;
+    globalStats.totalErrors += totalIssues;
+    globalStats.totalSegments += totalSegments;
+    globalStats.totalAmount += totalClaimAmount;
+    localStorage.setItem('globalStats', JSON.stringify(globalStats));
+    
+    let fileStats = JSON.parse(localStorage.getItem('fileStats') || '{"total":0,"837":0,"835":0,"834":0}');
+    fileStats.total += 1;
+    if (detectType.includes('837')) fileStats['837']++;
+    else if (detectType.includes('835')) fileStats['835']++;
+    else if (detectType.includes('834')) fileStats['834']++;
+    localStorage.setItem('fileStats', JSON.stringify(fileStats));
+    sessionStorage.setItem(sessionProcessedKey, 'true');
+  }
+
+  // Populate Global Stats Cards
+  const gStats = JSON.parse(localStorage.getItem('globalStats') || '{"totalFiles":0,"totalErrors":0,"totalSegments":0,"totalAmount":0}');
+  if (el('global-total-files')) el('global-total-files').innerText = gStats.totalFiles;
+  if (el('global-total-errors')) el('global-total-errors').innerText = gStats.totalErrors;
+  if (el('global-total-segments')) el('global-total-segments').innerText = gStats.totalSegments;
+  if (el('global-total-amount')) {
+    el('global-total-amount').innerText = '$' + gStats.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  // --- Validation Summary ---
+  const valid = Math.max(totalSegments - errorCount, 0);
+  if (el('summary-valid-segments')) el('summary-valid-segments').innerText = valid;
+  if (el('summary-invalid-segments')) el('summary-invalid-segments').innerText = errorCount;
+  if (el('summary-missing-fields')) el('summary-missing-fields').innerText = warningCount;
+
+  // --- Error Breakdown ---
+  const errorList = el('summary-error-list');
+  if (errorList) {
+    if (issues.length === 0) {
+      errorList.innerHTML = '<p class="text-green-500 text-sm font-bold flex items-center gap-2"><span>✔</span> No errors found</p>';
+    } else {
+      const tally = {};
+      issues.forEach(e => {
+        const key = e.description ? e.description.slice(0, 55) : e.segment || 'Unknown';
+        tally[key] = (tally[key] || 0) + 1;
+      });
+      const sorted = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      errorList.innerHTML = sorted.map(([desc, count]) => {
+        const sevColor = count > 1 ? 'text-red-500' : 'text-yellow-500';
+        return `<div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
+          <span class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 mr-3">${desc}</span>
+          <span class="font-bold text-xs px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/20 ${sevColor} shrink-0">×${count}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Remove placeholder provider content — ONLY show claim amount for 837
+  if (el('summary-type-insights')) {
+    el('summary-type-insights').innerHTML = ''; // Clear fake content
+    if (detectType.includes('837') && totalClaimAmount > 0) {
+      const claimCard = document.createElement('div');
+      claimCard.className = 'card shadow-sm border-l-4 border-l-emerald-500';
+      claimCard.innerHTML = `
+        <p class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">Claim Amount</p>
+        <h3 class="text-3xl font-black text-emerald-600">$${totalClaimAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+        <p class="text-xs text-slate-400 mt-1">Extracted from BPR</p>`;
+      el('summary-type-insights').appendChild(claimCard);
+    }
+  }
+
+  // --- AI Insight (Dynamic + Emoji Indicators) ---
+  const aiInsight = el('ai-insight-text');
+  if (aiInsight) {
+    let insightStr = "✅ File looks good. No major validation issues found.";
+
+    if (errorCount > 0) {
+      const firstError = issues.find(i => {
+        const s = (i.severity || "").toUpperCase().trim();
+        return s === "ERROR" || s === "CRITICAL" || s === "HIGH";
+      });
+
+      if (firstError && firstError.segment) {
+        insightStr = `❌ Most issues are associated with "${firstError.segment}". Please review this segment.`;
+      } else {
+        insightStr = "❌ Errors detected. Please review validation report.";
+      }
+    } else if (warningCount > 0) {
+      insightStr = "⚠️ Warnings detected. Review recommended improvements.";
+    }
+
+    aiInsight.innerText = insightStr;
+  }
+
+  // --- Charts ---
+  const validSegs = Math.max(totalSegments - errorCount, 0);
+  if (window._fileTypeChartInstance) { window._fileTypeChartInstance.destroy(); }
+  if (window._errorChartInstance) { window._errorChartInstance.destroy(); }
+
+  import('chart.js/auto').then(({ default: Chart }) => {
+    const ftCanvas = document.getElementById('fileTypeChart');
+    const erCanvas = document.getElementById('errorChart');
+    const stats = JSON.parse(localStorage.getItem('fileStats') || '{}');
+
+    if (ftCanvas && stats) {
+      window._fileTypeChartInstance = new Chart(ftCanvas, {
+        type: 'pie',
+        data: {
+          labels: ['837 Professional', '835 Payment', '834 Enrollment'],
+          datasets: [{
+            data: [stats['837'] || 0, stats['835'] || 0, stats['834'] || 0],
+            backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } } }
+      });
+    }
+
+    if (erCanvas) {
+      window._errorChartInstance = new Chart(erCanvas, {
+        type: 'pie',
+        data: {
+          labels: ['Errors', 'Valid Segments'],
+          datasets: [{
+            data: [errorCount, validSegs],
+            backgroundColor: ['#ef4444', '#22c55e'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } } }
+      });
+    }
+  }).catch(() => console.log('Chart.js not available'));
+};
+
