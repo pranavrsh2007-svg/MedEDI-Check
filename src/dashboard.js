@@ -1,5 +1,30 @@
 import './style.css'
 
+// ── Demo Mode State ────────────────────────────────────────────────────────────
+let isDemoMode = false; // never true by default — only set on "Try Demo Data" click
+
+function updateDemoBanner() {
+  const banner = document.getElementById('demoBanner');
+  if (!banner) return;
+  if (isDemoMode) {
+    banner.style.display = 'flex';
+    // Re-trigger slide animation each time it appears
+    banner.classList.remove('banner-in');
+    void banner.offsetWidth; // force reflow
+    banner.classList.add('banner-in');
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+window.goToUpload = function () {
+  // Navigate to the upload view within the SPA
+  if (typeof window.switchView === 'function') {
+    window.switchView('upload');
+  }
+};
+
+
 // Global EDI Store for shared state management
 window.ediStore = {
   uploadedFiles: JSON.parse(localStorage.getItem('edi_files') || '[]'),
@@ -81,6 +106,12 @@ document.querySelector('#app').innerHTML = `
         </button>
       </div>
     </header>
+
+    <!-- Demo Mode Banner -->
+    <div id="demoBanner" style="display:none" class="demo-banner">
+      <span>⚡ Demo Mode Active — Upload your file to analyze real data</span>
+      <button onclick="goToUpload()" class="demo-banner-btn">Upload File</button>
+    </div>
 
     <!-- Scrollable Workspace -->
     <div id="workspace" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
@@ -496,6 +527,7 @@ document.querySelector('#app').innerHTML = `
              <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest font-black mb-1">Summary Report</p>
              <h2 id="summary-title" class="text-2xl font-bold transition-colors">EDI Claims Summary</h2>
              <p id="summary-subtitle" class="text-slate-500 dark:text-slate-400 text-sm mt-1">No file loaded yet. Upload a file to see detailed insights.</p>
+             <p id="summary-empty-msg" class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-left hidden">No data available. Upload a file or <a href="#" onclick="window.tryDemoFile(); return false;" class="text-blue-500 hover:underline transition-colors">use demo data</a> to explore insights.</p>
            </div>
            <div id="summary-file-meta" class="flex flex-wrap gap-4 items-center text-sm hidden">
              <div class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-mono text-xs">
@@ -727,6 +759,10 @@ document.querySelector('#app').innerHTML = `
   </main>
 `
 
+// Demo banner: never show on initial page load — only after clicking "Try Demo Data" this session
+// (no localStorage persistence, so refresh always starts clean)
+localStorage.removeItem('demoMode'); // clear any stale flag from previous sessions
+
 // Simple Router implementation
 window.switchView = function (viewId) {
   // Sync UI with store before switching
@@ -764,6 +800,7 @@ window.switchView = function (viewId) {
   // Update nav UI
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.classList.remove('text-blue-700', 'bg-blue-50', 'dark:bg-blue-900/30', 'dark:text-blue-400')
+    btn.classList.remove('nav-active')
     btn.classList.add('text-slate-600', 'dark:text-slate-400')
     btn.querySelector('svg').classList.remove('text-blue-600', 'dark:text-blue-400')
     btn.querySelector('svg').classList.add('text-slate-400', 'dark:text-slate-500')
@@ -772,10 +809,10 @@ window.switchView = function (viewId) {
   // set active class
   const activeBtn = document.querySelector(`.nav-btn[data-view="${viewId}"]`)
   if (activeBtn) {
-    activeBtn.classList.add('text-blue-700', 'bg-blue-50', 'dark:bg-blue-900/30', 'dark:text-blue-400')
-    activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400')
-    activeBtn.querySelector('svg').classList.add('text-blue-600', 'dark:text-blue-400')
-    activeBtn.querySelector('svg').classList.remove('text-slate-400', 'dark:text-slate-500')
+    activeBtn.classList.add('nav-active')
+    activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'text-blue-700', 'bg-blue-50', 'dark:bg-blue-900/30', 'dark:text-blue-400')
+    // svg color is handled entirely by .nav-active svg in CSS
+    activeBtn.querySelector('svg').classList.remove('text-slate-400', 'dark:text-slate-500', 'text-blue-600', 'dark:text-blue-400')
 
     // Update Title
     document.getElementById('topbar-title').innerText = activeBtn.innerText.trim()
@@ -925,11 +962,11 @@ if (dropZone) {
     const reader = new FileReader();
     reader.onload = function (e) {
       const ediContent = e.target.result;
-      
+
       // Basic "Security" Validation (Content Sanity Check)
       const firstSegment = ediContent.trim().substring(0, 3).toUpperCase();
       const validHeaders = ['ISA', 'GS', 'ST'];
-      
+
       if (!validHeaders.includes(firstSegment)) {
         const errorEl = document.getElementById('upload-error');
         if (errorEl) {
@@ -962,9 +999,13 @@ if (dropZone) {
       // Set current file and add to history
       window.ediStore.currentFile = newFileEntry;
       window.ediStore.uploadedFiles = [newFileEntry, ...window.ediStore.uploadedFiles.slice(0, 4)];
-      
+
       // Persist history
       localStorage.setItem('edi_files', JSON.stringify(window.ediStore.uploadedFiles));
+
+      // Dismiss Demo Mode on real file upload
+      isDemoMode = false;
+      updateDemoBanner();
 
       // Trigger Centralized UI Update
       window.updateUIFromStore();
@@ -974,7 +1015,7 @@ if (dropZone) {
         loadingContent.classList.remove('flex');
         uploadContent.classList.remove('hidden');
 
-        window.switchView('dashboard'); 
+        window.switchView('dashboard');
         fileInput.value = '';
       }, 1500);
     };
@@ -982,13 +1023,13 @@ if (dropZone) {
   }
 
   // Centralized UI Update Function
-  window.updateUIFromStore = function() {
+  window.updateUIFromStore = function () {
     const { currentFile, uploadedFiles } = window.ediStore;
-    
+
     // Toggle Visibility based on file count
     const emptyState = document.getElementById('dashboard-empty-state');
     const contentArea = document.getElementById('dashboard-content');
-    
+
     if (uploadedFiles.length === 0) {
       if (emptyState) emptyState.classList.remove('hidden');
       if (contentArea) contentArea.classList.add('hidden');
@@ -1002,32 +1043,32 @@ if (dropZone) {
     if (totalFilesEl) totalFilesEl.innerText = uploadedFiles.length;
 
     if (currentFile) {
-        // Last File Status Stats
-        const lastStatusEl = document.getElementById('stat-last-status');
-        const lastStatusBadgeEl = document.getElementById('stat-last-status-badge');
-        const errorCountEl = document.getElementById('stat-error-count');
+      // Last File Status Stats
+      const lastStatusEl = document.getElementById('stat-last-status');
+      const lastStatusBadgeEl = document.getElementById('stat-last-status-badge');
+      const errorCountEl = document.getElementById('stat-error-count');
 
-        if (lastStatusEl) lastStatusEl.innerText = currentFile.status === 'Valid' ? 'Healthy' : 'Needs Repair';
-        if (lastStatusBadgeEl) {
-            lastStatusBadgeEl.className = currentFile.status === 'Valid' ? 'badge-success' : 'badge-error';
-            lastStatusBadgeEl.innerText = currentFile.status === 'Valid' ? '✔' : '✘';
-        }
-        if (errorCountEl) errorCountEl.innerText = currentFile.errors ? currentFile.errors.length : 0;
+      if (lastStatusEl) lastStatusEl.innerText = currentFile.status === 'Valid' ? 'Healthy' : 'Needs Repair';
+      if (lastStatusBadgeEl) {
+        lastStatusBadgeEl.className = currentFile.status === 'Valid' ? 'badge-success' : 'badge-error';
+        lastStatusBadgeEl.innerText = currentFile.status === 'Valid' ? '✔' : '✘';
+      }
+      if (errorCountEl) errorCountEl.innerText = currentFile.errors ? currentFile.errors.length : 0;
     }
-    
+
     // Update Dashboard (if we have a current file)
     window.updateDashboardSummaryUI(currentFile?.raw, currentFile?.name, currentFile?.type, currentFile?.errors || []);
-    
+
     // Update Detailed Views (always sync with current file or empty)
     window.updateValidationReportUI(currentFile?.errors || [], currentFile?.name || "No File", currentFile?.type || "N/A", currentFile?.segments?.length || 0);
     window.updateParsedDataUI(currentFile?.segments || [], currentFile?.type || "N/A", currentFile?.name || "No File", currentFile?.errors || []);
-    
+
     // Update Recent Files Table (always from store)
     window.updateRecentFilesUI_FromStore(uploadedFiles);
   };
 
   // Demo Data Injection
-  window.tryDemoFile = function() {
+  window.tryDemoFile = function () {
     const mockData = {
       name: "sample_837_claims_batch.edi",
       type: "837P",
@@ -1054,17 +1095,21 @@ if (dropZone) {
     window.ediStore.currentFile = mockData;
     window.ediStore.uploadedFiles = [mockData, ...window.ediStore.uploadedFiles.filter(f => f.name !== mockData.name).slice(0, 4)];
     localStorage.setItem('edi_files', JSON.stringify(window.ediStore.uploadedFiles));
-    
+
+    // Activate Demo Mode
+    isDemoMode = true;
+    updateDemoBanner();
+
     // Animate transition
     const emptyState = document.getElementById('dashboard-empty-state');
     if (emptyState) {
-        emptyState.classList.add('opacity-0', 'scale-95');
-        setTimeout(() => {
-            window.updateUIFromStore();
-            window.switchView('dashboard');
-        }, 300);
-    } else {
+      emptyState.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => {
         window.updateUIFromStore();
+        window.switchView('dashboard');
+      }, 300);
+    } else {
+      window.updateUIFromStore();
     }
   };
 }
@@ -1734,7 +1779,7 @@ window.viewFix = function (segment, description, loop, severity, buttonEl) {
     table.classList.replace('lg:col-span-5', 'lg:col-span-3');
     panel.classList.remove('hidden');
     panel.classList.add('flex');
-    
+
     // Smooth scroll and layout recalculation
     setTimeout(() => {
       window.dispatchEvent(new Event('resize'));
@@ -1893,7 +1938,7 @@ window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors
   const emptyState = document.getElementById('dashboard-empty-state');
   const dashboardContent = document.getElementById('dashboard-content');
   const badge = document.getElementById('dashboard-type-badge');
-  
+
   if (!ediText) {
     if (emptyState) emptyState.classList.remove('hidden');
     if (dashboardContent) dashboardContent.classList.add('hidden');
@@ -1906,7 +1951,7 @@ window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors
 
   // Update File Info Section
   document.getElementById('info-filename').innerText = fileName || "--";
-  
+
   let typeLabel = transType ? transType : "837P";
   let badgeClass = "badge-neutral";
   let iconHtml = "";
@@ -1934,7 +1979,7 @@ window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors
 
   document.getElementById('info-type').innerText = typeLabel;
   document.getElementById('info-time').innerText = "Just now";
-  
+
   const errCount = errors.filter(e => e.severity === 'Error').length;
   const statusEl = document.getElementById('info-status');
   if (errCount > 0) {
@@ -1963,7 +2008,7 @@ window.updateDashboardSummaryUI = function (ediText, fileName, transType, errors
   if (!cardsContainer) return;
 
   const segments = ediText.split("~").map(s => s.trim()).filter(Boolean);
-  
+
   if (transType === '837') {
     render837Dashboard(segments, cardsContainer);
   } else if (transType === '835') {
@@ -1992,7 +2037,7 @@ function render837Dashboard(segments, container) {
       const parts = seg.split("*");
       // 85 = Billing Provider, 71 = Attending Provider
       if (parts[1] === "85" || parts[1] === "71" || parts[1] === "FA") {
-         providers.add(parts[3]);
+        providers.add(parts[3]);
       }
     }
   });
@@ -2079,7 +2124,7 @@ function render834Dashboard(segments, container) {
 function createStatCard(label, value, id, isCurrency, color) {
   let colorClass = "text-blue-600";
   let borderClass = "border-l-blue-500";
-  
+
   if (color === "green") { colorClass = "text-green-600"; borderClass = "border-l-green-500"; }
   if (color === "purple") { colorClass = "text-purple-600"; borderClass = "border-l-purple-500"; }
   if (color === "amber") { colorClass = "text-amber-600"; borderClass = "border-l-amber-500"; }
@@ -2154,7 +2199,7 @@ if (themeToggle) {
 }
 
 // AI Assistant Chat Logic
-window.addChatMessage = function(text, isUser = false) {
+window.addChatMessage = function (text, isUser = false) {
   const container = document.getElementById('chat-messages');
   if (!container) return;
 
@@ -2184,7 +2229,7 @@ window.addChatMessage = function(text, isUser = false) {
   container.scrollTop = container.scrollHeight;
 }
 
-window.handleAISend = function() {
+window.handleAISend = function () {
   const input = document.getElementById('aiInput');
   if (!input || !input.value.trim()) return;
 
@@ -2195,7 +2240,7 @@ window.handleAISend = function() {
   // Simulated AI Response
   setTimeout(() => {
     let response = "I'm analyzing your request regarding EDI structures. Based on the context, it seems you're working with X12 protocols. How can I specifically help with your segment data?";
-    
+
     if (text.toLowerCase().includes('n4')) {
       response = "The N4 segment specifies the city, state, and zip code. If you're missing the zip (N403), the claim might be rejected by the clearinghouse. Always ensure N4*CITY*ST*ZIP~ format.";
     } else if (text.toLowerCase().includes('isa')) {
@@ -2206,12 +2251,12 @@ window.handleAISend = function() {
   }, 1000);
 }
 
-window.downloadFixedFile = function() {
+window.downloadFixedFile = function () {
   if (!window.currentUploadedFileContent) return;
-  
+
   const content = window.currentUploadedFileContent;
   const fileName = (window.currentUploadedFileName || 'corrected').replace(/\.(edi|txt)$/i, '') + '_fixed.edi';
-  
+
   const blob = new Blob([content], { type: 'text/plain' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2243,7 +2288,7 @@ window.updateRecentFilesUI_FromStore = function (files) {
       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
       Healthy
     </span>`;
-    
+
     if (errCount > 0) {
       statusBadge = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
@@ -2306,7 +2351,7 @@ window.updateRecentFilesUI_FromStore = function (files) {
 }
 
 // Helper to switch to a historically uploaded file
-window.switchViewToStoredFile = function(fileName) {
+window.switchViewToStoredFile = function (fileName) {
   const file = window.ediStore.uploadedFiles.find(f => f.name === fileName);
   if (file) {
     window.ediStore.currentFile = file;
@@ -2315,17 +2360,17 @@ window.switchViewToStoredFile = function(fileName) {
   }
 }
 
-window.handleInspectClick = function(fileName) {
+window.handleInspectClick = function (fileName) {
   console.log("Inspect clicked:", fileName);
-  
+
   // Find file in store to get raw data
   const file = window.ediStore.uploadedFiles.find(f => f.name === fileName);
   const ediText = file ? file.raw : "";
-  
+
   // store selected file
   localStorage.setItem("selectedFileName", fileName);
   localStorage.setItem("selectedFileData", ediText || "");
-  
+
   // SWITCH VIEW (IMPORTANT)
   window.switchView("validation");
 
@@ -2346,7 +2391,7 @@ window.handleInspectClick = function(fileName) {
   window.highlightSelectedFile(fileName);
 };
 
-window.highlightSelectedFile = function(fileName) {
+window.highlightSelectedFile = function (fileName) {
   document.querySelectorAll("#recent-files-tbody tr").forEach(row => {
     row.classList.remove("bg-blue-50", "dark:bg-blue-900/20");
   });
@@ -2378,7 +2423,7 @@ window.addEventListener("load", () => {
 // Initialize on first load
 document.addEventListener('DOMContentLoaded', () => {
   window.runDashboardAnimations();
-  
+
   // Startup Splash Animation
   const splash = document.createElement('div');
   splash.id = 'startup-splash';
@@ -2391,7 +2436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
   document.body.appendChild(splash);
-  
+
   // Fade out and remove
   setTimeout(() => {
     splash.classList.add('fade-out');
@@ -2401,17 +2446,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1200);
 });
 
-window.updateSummaryUI = function() {
+window.updateSummaryUI = function () {
   const file = window.ediStore && window.ediStore.currentFile;
 
   // --- Header ---
   const title = document.getElementById('summary-title');
   const subtitle = document.getElementById('summary-subtitle');
   const fileMeta = document.getElementById('summary-file-meta');
+  const emptyMsg = document.getElementById('summary-empty-msg');
 
   if (!file || !file.raw) {
     if (title) title.innerText = 'EDI Claims Summary';
-    if (subtitle) subtitle.innerText = 'No file loaded yet. Upload a file to see detailed insights.';
+    if (subtitle) {
+      subtitle.innerText = 'No file loaded yet. Upload a file to see detailed insights.';
+      subtitle.classList.add('hidden');
+    }
+    if (emptyMsg) emptyMsg.classList.remove('hidden');
     if (fileMeta) fileMeta.classList.add('hidden');
     return;
   }
@@ -2426,7 +2476,11 @@ window.updateSummaryUI = function() {
   const typeLabel = detectType.includes('837') ? '837 Professional' : detectType.includes('835') ? '835 Payment' : detectType.includes('834') ? '834 Enrollment' : 'Unknown EDI';
 
   if (title) title.innerText = typeLabel + ' Summary';
-  if (subtitle) subtitle.innerText = 'Aggregated insights for: ' + (file.name || 'Unknown file');
+  if (subtitle) {
+    subtitle.classList.remove('hidden');
+    subtitle.innerText = 'Aggregated insights for: ' + (file.name || 'Unknown file');
+  }
+  if (emptyMsg) emptyMsg.classList.add('hidden');
 
   // File meta badges
   if (fileMeta) fileMeta.classList.remove('hidden');
@@ -2470,7 +2524,7 @@ window.updateSummaryUI = function() {
     globalStats.totalSegments += totalSegments;
     globalStats.totalAmount += totalClaimAmount;
     localStorage.setItem('globalStats', JSON.stringify(globalStats));
-    
+
     let fileStats = JSON.parse(localStorage.getItem('fileStats') || '{"total":0,"837":0,"835":0,"834":0}');
     fileStats.total += 1;
     if (detectType.includes('837')) fileStats['837']++;
@@ -2486,7 +2540,7 @@ window.updateSummaryUI = function() {
   if (el('global-total-errors')) el('global-total-errors').innerText = gStats.totalErrors;
   if (el('global-total-segments')) el('global-total-segments').innerText = gStats.totalSegments;
   if (el('global-total-amount')) {
-    el('global-total-amount').innerText = '$' + gStats.totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    el('global-total-amount').innerText = '$' + gStats.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   // --- Validation Summary ---
@@ -2525,7 +2579,7 @@ window.updateSummaryUI = function() {
       claimCard.className = 'card shadow-sm border-l-4 border-l-emerald-500';
       claimCard.innerHTML = `
         <p class="text-slate-500 font-bold text-xs uppercase tracking-wider mb-1">Claim Amount</p>
-        <h3 class="text-3xl font-black text-emerald-600">$${totalClaimAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+        <h3 class="text-3xl font-black text-emerald-600">$${totalClaimAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
         <p class="text-xs text-slate-400 mt-1">Extracted from BPR</p>`;
       el('summary-type-insights').appendChild(claimCard);
     }

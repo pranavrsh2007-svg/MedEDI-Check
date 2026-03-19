@@ -48,6 +48,26 @@ html {
     border-color: var(--border-color);
   }
 
+  /* ── Active nav item — distinct color for light AND dark mode ── */
+  .nav-active {
+    /* Light mode: crisp sky-blue tint */
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 0.5rem;
+  }
+  .nav-active svg {
+    color: #2563eb;
+  }
+
+  /* Dark mode: deep indigo glow */
+  .dark .nav-active {
+    background-color: rgba(99, 102, 241, 0.18);
+    color: #818cf8;
+  }
+  .dark .nav-active svg {
+    color: #818cf8;
+  }
+
   .btn-primary {
     background-color: var(--accent-blue);
     @apply px-4 py-2 text-white rounded-lg hover:opacity-90 transition-all duration-200 font-medium shadow-sm active:scale-95;
@@ -295,4 +315,213 @@ html {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* ── Demo Mode Banner ──────────────────────────────────────────────────────── */
+.demo-banner {
+  width: 100%;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  border-radius: 0;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
+  animation: slideFade 0.4s ease;
+}
+
+.demo-banner span {
+  max-width: 800px;
+}
+
+/* Dark mode: softer amber/red */
+.dark .demo-banner {
+  background: linear-gradient(to right, #f59e0b, #ef4444);
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.2);
+}
+
+/* Upload button inside the banner */
+.demo-banner-btn {
+  background: rgba(255,255,255,0.95) !important;
+  color: #1e293b !important;
+  border: none !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.demo-banner-btn:hover {
+  background: white !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Slide + fade entrance */
+@keyframes slideFade {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.banner-in {
+  animation: slideFade 0.4s ease both;
+}
+
+/* Auto-hide animation */
+.demo-banner.hide {
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* UI FIXES - LOGIN PAGE ONLY */
+
+/* Full-screen dark background wrapper for the login page */
+.auth-page-wrapper {
+  position: fixed;
+  inset: 0;
+  background: #060f1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 24px;
+}
+
+/* Logo + app name block inside the card */
+.auth-logo-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-bottom: 28px !important;
+  gap: 10px;
+}
+
+.auth-logo-block img {
+  width: 72px !important;
+  height: 72px !important;
+  object-fit: contain !important;
+  animation: logoMaterialize 4s ease-in-out infinite;
+}
+
+.auth-logo-block span {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  /* Shimmer text that cycles in sync with the logo */
+  background: linear-gradient(
+    90deg,
+    #e2e8f0 0%,
+    #ffffff 30%,
+    #a5b4fc 50%,
+    #ffffff 70%,
+    #e2e8f0 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textShimmerCycle 4s ease-in-out infinite;
+}
+
+/* ── Logo: scan in → hold → expand-out → gone → repeat ── */
+@keyframes logoMaterialize {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+    filter: drop-shadow(0 0 0px rgba(99, 102, 241, 0));
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.95));
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+    filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+  }
+  68% {
+    opacity: 1;
+    transform: scale(1);
+    filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+  }
+  85% {
+    opacity: 0;
+    transform: scale(1.35);
+    filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+    filter: drop-shadow(0 0 0px rgba(99, 102, 241, 0));
+  }
+}
+
+/* ── Text: shimmer sweeps left→right in the same 4s cycle ── */
+@keyframes textShimmerCycle {
+  0%   { background-position: 200% center; opacity: 0; }
+  18%  { opacity: 1; }
+  30%  { background-position: 0% center; }
+  68%  { background-position: 0% center; opacity: 1; }
+  85%  { background-position: -200% center; opacity: 0; }
+  100% { background-position: 200% center; opacity: 0; }
+}
+
+/* Bigger login card */
+.login-card {
+  background: #1e293b !important;
+  padding: 44px !important;
+  border-radius: 20px !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 0 60px rgba(79, 70, 229, 0.25), 0 20px 60px rgba(0,0,0,0.5) !important;
+  width: 100% !important;
+  max-width: 480px !important;
+}
+
+/* Scope dark input/button styles strictly to the login card */
+.login-card input {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: white !important;
+}
+
+.login-card input:focus {
+  border-color: #4f46e5 !important;
+  outline: none !important;
+}
+
+.login-card button {
+  background: linear-gradient(to right, #2563eb, #4f46e5) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 10px !important;
+}
+
+.login-card button:hover {
+  transform: scale(1.03);
 }
