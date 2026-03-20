@@ -300,7 +300,6 @@ document.querySelector('#app').innerHTML = `
                       <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Upload Time</th>
                       <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Status</th>
                       <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">Issues</th>
-                      <th class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody id="recent-files-tbody" class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800 group/list transition-colors duration-300">
@@ -345,13 +344,17 @@ document.querySelector('#app').innerHTML = `
                <h2 class="text-2xl font-bold transition-colors duration-300">Parsed EDI Structure</h2>
                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors duration-300">Showing hierarchical view of 837 Claim data</p>
              </div>
-            <div class="flex space-x-3">
-               <button class="btn-secondary text-sm">Expand All</button>
-               <button class="btn-primary flex items-center shadow-sm text-sm">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                  Download JSON
-               </button>
-            </div>
+             <div class="flex items-center space-x-3">
+                <div class="relative">
+                  <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                  <input id="searchInput" type="text" placeholder="Search segments..." class="pl-9 pr-4 py-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm transition-all focus:ring-2 focus:ring-blue-500 shadow-sm outline-none">
+                </div>
+                <button class="btn-secondary text-sm">Expand All</button>
+                <button class="btn-primary flex items-center shadow-sm text-sm">
+                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                   Download JSON
+                </button>
+             </div>
           </div>
           
           <div class="parsed-wrapper">
@@ -395,11 +398,10 @@ document.querySelector('#app').innerHTML = `
                          <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Segment</th>
                          <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Loop</th>
                          <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Description</th>
-                         <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Suggestion</th>
-                         <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">Action</th>
+                         <th class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-left text-gray-600 dark:text-gray-300">AI Suggestion</th>
                       </tr>
                   </thead>
-               <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"><tr><td colspan="7" class="px-6 py-10 text-center text-slate-500 italic">No validation issues to report.</td></tr></tbody>
+               <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"><tr><td colspan="6" class="px-6 py-10 text-center text-slate-500 italic">No validation issues to report.</td></tr></tbody>
                 </table>
                 </div>
              </div>
@@ -435,10 +437,23 @@ document.querySelector('#app').innerHTML = `
                  </h5>
                  <div class="fix-example-text bg-slate-800 text-green-300 p-4 rounded-lg font-mono text-xs overflow-x-auto shadow-inner leading-relaxed whitespace-pre-wrap mb-4"></div>
                  
-                 <button id="askAIButton" onclick="window.askAIAssistant()" class="apply-fix-btn w-full btn-primary bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center shadow-sm text-sm py-2 rounded-lg">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Ask AI Assistant
-                 </button>
+                  <!-- AI Actions -->
+                  <div class="flex flex-col gap-3">
+                    <button id="askAIButton" onclick="window.askAIAssistant()" class="w-full bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                       Ask AI Assistant
+                    </button>
+                    
+                    <button id="fixAIBtn_Validation" onclick="window.askAIFix()" class="w-full bg-red-600 hover:bg-red-700 text-white flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       Fix with AI
+                    </button>
+
+                    <button id="copyFormatBtn" onclick="window.copyFormatFromValidation()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                       Copy Correct Format
+                    </button>
+                  </div>
                </div>
              </div>
           </div>
@@ -475,10 +490,23 @@ document.querySelector('#app').innerHTML = `
                  </h5>
                  <div class="fix-example-text bg-slate-800 text-green-300 p-4 rounded-lg font-mono text-xs overflow-x-auto shadow-inner leading-relaxed whitespace-pre-wrap mb-4"></div>
                  
-                 <button id="askAIButton" onclick="window.askAIAssistant()" class="apply-fix-btn w-full btn-primary bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center shadow-sm text-sm py-2 rounded-lg">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Ask AI Assistant
-                 </button>
+                  <!-- AI Actions -->
+                  <div class="flex flex-col gap-3">
+                    <button id="askAIButtonModal" onclick="window.askAIAssistant()" class="w-full bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                       Ask AI Assistant
+                    </button>
+                    
+                    <button id="fixAIBtn_ValidationModal" onclick="window.askAIFix()" class="w-full bg-red-600 hover:bg-red-700 text-white flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                       Fix with AI
+                    </button>
+
+                    <button id="copyFormatBtnModal" onclick="window.copyFormatFromValidation()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200 flex justify-center items-center shadow-sm text-sm py-2.5 rounded-lg font-bold transition-all">
+                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                       Copy Correct Format
+                    </button>
+                  </div>
                </div>
             </div>
           </div>
@@ -1623,30 +1651,66 @@ window.updateValidationReportUI = function (errors, fileName, transType = 'unkno
 
   errors.forEach(err => {
     let badgeClass = 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
-    if (err.severity === 'Error') badgeClass = 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
-    if (err.severity === 'Warning') badgeClass = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
-    if (err.severity === 'Info') badgeClass = 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
-    if (err.severity === 'Success') badgeClass = 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
+    const severityUpper = (err.severity || '').toUpperCase();
+    if (severityUpper === 'ERROR' || severityUpper === 'HIGH') badgeClass = 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
+    if (severityUpper === 'CRITICAL') badgeClass = 'bg-red-200 text-red-800 dark:bg-red-950 dark:text-red-200 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ring-1 ring-red-300';
+    if (severityUpper === 'WARNING' || severityUpper === 'MEDIUM') badgeClass = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
+    if (severityUpper === 'INFO') badgeClass = 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
+    if (severityUpper === 'SUCCESS') badgeClass = 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider';
 
-    const tr = document.createElement('tr');
     let rowHighlight = 'hover:bg-gray-50 dark:hover:bg-gray-700';
-    if (err.severity === 'Error') rowHighlight = 'bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20';
-    if (err.severity === 'Warning') rowHighlight = 'bg-yellow-50/50 dark:bg-yellow-900/10 hover:bg-yellow-50 dark:hover:bg-yellow-900/20';
+    if (severityUpper === 'ERROR' || severityUpper === 'HIGH' || severityUpper === 'CRITICAL') rowHighlight = 'bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20';
+    if (severityUpper === 'WARNING' || severityUpper === 'MEDIUM') rowHighlight = 'bg-yellow-50/50 dark:bg-yellow-900/10 hover:bg-yellow-50 dark:hover:bg-yellow-900/20';
+    const tr = document.createElement('tr');
+    tr.className = `border-b border-gray-200 dark:border-gray-700 transition-all duration-200 group cursor-pointer relative validation-row ${rowHighlight}`;
+    tr.dataset.segment = err.segment;
+    tr.dataset.description = err.description.replace(/'/g, "\\'");
+    tr.dataset.loop = err.loop;
+    tr.dataset.severity = err.severity;
 
-    tr.className = `border-b border-gray-200 dark:border-gray-700 transition-colors duration-300 group cursor-pointer relative ${rowHighlight}`;
     tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap"><span class="${badgeClass}">${err.severity}</span></td>
-            <td class="px-6 py-4 font-mono font-medium whitespace-nowrap">${err.line > 0 ? 'Line ' + err.line : 'Global'}</td>
-            <td class="px-6 py-4 font-mono font-medium whitespace-nowrap">${err.segment}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${err.loop}</td>
-            <td class="px-6 py-4 font-medium">${err.description}</td>
-            <td class="px-6 py-4 text-slate-500 italic text-xs">${err.suggestion || 'N/A'}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${err.severity !== 'Success' ? `<button onclick="window.viewFix('${err.segment}', '${err.description.replace(/'/g, "\\'")}', '${err.loop}', '${err.severity}', this)" class="viewFixBtn text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-300">View Problem</button>` : ''}
+            <td class="px-4 py-3 whitespace-nowrap"><span class="${badgeClass}">${err.severity}</span></td>
+            <td class="px-4 py-3 font-mono font-medium whitespace-nowrap text-sm">${err.line > 0 ? 'L' + err.line : 'Glbl'}</td>
+            <td class="px-4 py-3 font-mono font-bold whitespace-nowrap text-blue-700 dark:text-blue-400">${err.segment}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm">${err.loop}</td>
+            <td class="px-4 py-3 text-sm leading-snug">${err.description}</td>
+            <td class="px-4 py-3 text-xs">
+              <div class="flex flex-col gap-1.5">
+                <span class="text-slate-500 dark:text-slate-400 italic leading-snug">${err.suggestion || 'N/A'}</span>
+                ${err.severity !== 'Success' ? `
+                <button class="view-row-btn mt-[6px] px-[10px] py-[4px] text-[12px] bg-[#2563eb] text-white rounded-[6px] hover:bg-blue-700 transition-colors relative z-10 inline-block self-start w-fit max-w-min">View &rarr;</button>` : ''}
+              </div>
             </td>
         `;
+
+    // Row click opens fix panel
+    if (err.severity !== 'Success') {
+      tr.addEventListener('click', () => {
+        window.viewFix(tr.dataset.segment, tr.dataset.description, tr.dataset.loop, tr.dataset.severity, tr);
+      });
+
+      // Button click should not double-fire the row click
+      const viewBtn = tr.querySelector('.view-row-btn');
+      if (viewBtn) {
+        viewBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.viewFix(tr.dataset.segment, tr.dataset.description, tr.dataset.loop, tr.dataset.severity, tr);
+        });
+      }
+    }
+
     tbody.appendChild(tr);
   });
+
+
+  // Auto-open first error row if exists
+  const firstErrorRow = tbody.querySelector('tr.validation-row');
+  if (firstErrorRow) {
+    // Small delay to ensure DOM is ready and animation looks smooth
+    setTimeout(() => {
+      firstErrorRow.click();
+    }, 100);
+  }
 
   // Show/Hide Download button if there's content to download
   const downloadBtn = document.getElementById('download-btn');
@@ -1715,12 +1779,14 @@ window.viewFix = function (segment, description, loop, severity, buttonEl) {
   document.querySelectorAll('.fix-example-text').forEach(el => el.innerText = data.example + '~');
 
   // Remove existing row highlights and apply highlight to active row
-  document.querySelectorAll('#validationTable tbody tr').forEach(row => {
-    row.classList.remove('bg-blue-50', 'dark:bg-blue-900/40');
+  document.querySelectorAll('#validationTable tbody tr.validation-row').forEach(row => {
+    row.classList.remove('bg-blue-50', 'dark:bg-blue-900/40', 'border-l-4', 'border-blue-600');
   });
-  if (buttonEl) {
-    const activeRow = buttonEl.closest('tr');
-    if (activeRow) activeRow.classList.add('bg-blue-50', 'dark:bg-blue-900/40');
+
+  // buttonEl is now the TR itself or an element within it
+  const activeRow = (buttonEl instanceof HTMLTableRowElement) ? buttonEl : buttonEl?.closest('tr');
+  if (activeRow) {
+    activeRow.classList.add('bg-blue-50', 'dark:bg-blue-900/40', 'border-l-4', 'border-blue-600');
   }
 
   // Display Mode Context
@@ -2682,6 +2748,24 @@ document.addEventListener("click", function(e) {
   panel.classList.add("show");
   left.classList.add("active");
 
+  // Highlight active segment
+  document.querySelectorAll(".segment").forEach(s => s.classList.remove("active"));
+  el.classList.add("active");
+
+  // Error Detection
+  let errorHTML = "";
+  if (el.classList.contains("error")) {
+    errorHTML = `
+      <div style="margin-top:12px; background:#fee2e2; color:#b91c1c; padding:12px; border-radius:10px; border:1px solid #fecaca; font-size:13px; display:flex; gap:10px; align-items:flex-start;">
+        <span style="font-size:16px;">❌</span>
+        <div>
+          <b style="display:block; margin-bottom:2px;">Error Detected</b>
+          Potential invalid format or missing required elements in ${type} segment.
+        </div>
+      </div>
+    `;
+  }
+
   panel.innerHTML = `
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
     <div style="display:flex; align-items:center; gap:8px;">
@@ -2692,6 +2776,8 @@ document.addEventListener("click", function(e) {
     </div>
     <button id="closeBtn" style="background:none; border:none; font-size:18px; cursor:pointer; color:#64748b; transition:color 0.2s;">✖</button>
   </div>
+
+  ${errorHTML}
 
   <p style="color:#475569; font-size:14px; line-height:1.5; margin-bottom:16px;">${data.description}</p>
 
@@ -2711,11 +2797,18 @@ document.addEventListener("click", function(e) {
     <pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:10px; font-size:12px; overflow-x:auto; font-family: 'JetBrains Mono', monospace;">
 ${data.example}
     </pre>
+    <button id="copyBtn" style="margin-top:10px; background:#f1f5f9; border:1px solid #e2e8f0; padding:6px 12px; border-radius:6px; font-size:12px; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;">
+      📋 Copy Segment
+    </button>
   </div>
 
-  <div style="margin-top:20px; padding-top:20px; border-top: 1px solid #f1f5f9;">
+  <div style="margin-top:20px; padding-top:20px; border-top: 1px solid #f1f5f9; display:flex; flex-direction:column; gap:10px;">
     <button id="askAiBtn" style="width:100%; background:#2563eb; color:white; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
-      🤖 Ask AI about this segment
+      🤖 Ask AI Assistant
+    </button>
+    
+    <button id="simpleAiBtn" style="width:100%; background:#059669; color:white; padding:10px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+      🧠 Explain Simply
     </button>
   </div>
 `;
@@ -2740,6 +2833,73 @@ ${data.example}
     };
   }
 
+  const copyBtn = document.getElementById("copyBtn");
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(el.innerText);
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = "✅ Copied!";
+      setTimeout(() => copyBtn.innerHTML = originalText, 2000);
+    };
+  }
+
+
+  const simpleBtn = document.getElementById("simpleAiBtn");
+  if (simpleBtn) {
+    simpleBtn.onclick = () => {
+      const msg = `Explain ${type} EDI segment in very simple terms for beginners.`;
+      localStorage.setItem("ai_query", msg);
+      window.switchView("assistant");
+    };
+  }
+
 });
+
+// --- Search Filter Logic ---
+document.addEventListener("input", (e) => {
+  if (e.target.id === "searchInput") {
+    const val = e.target.value.toLowerCase();
+    document.querySelectorAll(".segment").forEach(el => {
+      const isMatch = el.innerText.toLowerCase().includes(val);
+      el.style.display = isMatch ? "" : "none";
+      
+      // Also hide parents if no children match (optional but cleaner)
+      let parent = el.parentElement;
+      while (parent && parent.tagName === 'LI') {
+        if (isMatch) parent.style.display = "";
+        parent = parent.parentElement;
+      }
+    });
+  }
+});
+
+// AI Button Helper Functions
+window.copyFormatFromValidation = function() {
+  const exampleText = document.querySelector('.fix-example-text')?.innerText;
+  if (exampleText) {
+    navigator.clipboard.writeText(exampleText);
+    const btn = document.getElementById('copyFormatBtn');
+    if (btn) {
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      setTimeout(() => btn.innerHTML = originalText, 2000);
+    }
+  }
+};
+
+window.askAIFix = function() {
+  const errorJson = localStorage.getItem("selectedEDIError");
+  if (!errorJson) return;
+  const error = JSON.parse(errorJson);
+  const prompt = `I am validating a Healthcare EDI file and found an error.
+Segment: ${error.segment}
+Loop: ${error.loop}
+Problem: ${error.description}
+
+Please provide a detailed fix for this specific EDI segment error.`;
+  localStorage.setItem("ai_query", prompt);
+  window.switchView('assistant');
+};
+
 
 

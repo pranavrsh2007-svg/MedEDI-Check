@@ -749,4 +749,24 @@ html, body {
   display: none !important;
 }
 
+/* --- AI Analyzer Upgrades --- */
+.segment.active {
+  background: #e0edff !important;
+  border-left: 4px solid #2563eb !important;
+}
+
+.dark .segment.active {
+  background: rgba(37, 99, 235, 0.2) !important;
+  border-left-color: #3b82f6 !important;
+}
+
+.loader {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.98); }
+}
+
 /* --- Cleanup complete --- */
