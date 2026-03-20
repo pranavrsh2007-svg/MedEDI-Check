@@ -79,8 +79,10 @@ function renderLoadingScreen() {
 function renderAuthUI() {
   console.debug("[UI] Rendering Auth UI...");
   appDiv.innerHTML = `
-    <div class="auth-page-wrapper">
-      <div class="login-card animate-fade-in">
+    <div class="auth-page-wrapper login-bg">
+      <div class="floating-shape" style="width: 300px; height: 300px; top: -10%; left: -10%; filter: blur(50px);"></div>
+      <div class="floating-shape" style="width: 400px; height: 400px; bottom: -20%; right: -10%; filter: blur(60px); animation-delay: -5s;"></div>
+      <div class="login-card animate-fade-in glass-card relative z-10 p-10 mt-6">
         
         <!-- Logo + name INSIDE the card at the top -->
         <div class="auth-logo-block">

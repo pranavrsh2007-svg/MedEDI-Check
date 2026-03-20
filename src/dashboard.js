@@ -1,3 +1,32 @@
+
+// --- Premium Loading State ---
+window.showLoadingState = function(message) {
+  let loader = document.getElementById('global-loader');
+  if(!loader) {
+    loader = document.createElement('div');
+    loader.id = 'global-loader';
+    loader.className = 'fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300';
+    loader.innerHTML = `
+      <div class="glass-card p-8 flex flex-col items-center gap-5 animate-fade-in shadow-2xl rounded-2xl transform" style="transform: perspective(1000px) rotateX(2deg) scale(1.02);">
+        <div class="loader-spinner w-12 h-12 border-4 border-t-blue-500 border-white/20 rounded-full"></div>
+        <p class="font-bold text-lg tracking-wide" id="loader-msg">${message}</p>
+      </div>
+    `;
+    document.body.appendChild(loader);
+  } else {
+    document.getElementById('loader-msg').innerText = message;
+    loader.classList.remove('opacity-0', 'pointer-events-none');
+  }
+}
+
+window.hideLoadingState = function() {
+  const loader = document.getElementById('global-loader');
+  if(loader) {
+    loader.classList.add('opacity-0', 'pointer-events-none');
+    setTimeout(() => loader.remove(), 300);
+  }
+}
+
 import './style.css'
 
 // ── Demo Mode State ────────────────────────────────────────────────────────────
@@ -366,6 +395,12 @@ document.querySelector('#app').innerHTML = `
               </div>
             </div>
             
+            <!-- EMPTY STATE Panel -->
+            <div id="parsedEmptyState" class="edi-right flex flex-col items-center justify-center p-8 text-slate-400 dark:text-slate-500 text-center animate-fade-in">
+              <svg class="w-16 h-16 mb-4 opacity-40 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+              <p class="text-sm font-semibold">Click any segment to view details and AI explanations.</p>
+            </div>
+            <!-- Details Panel -->
             <div id="detailsPanel" class="edi-right hidden"></div>
           </div>
         </section>
@@ -387,8 +422,8 @@ document.querySelector('#app').innerHTML = `
                 </button>
              </div>
          </div>
-         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-             <div id="validationTable" class="transition-all duration-500 lg:col-span-5 card p-0 overflow-hidden shadow-sm rounded-xl">
+         <div class="validation-container">
+             <div class="table-section"><div id="validationTable" class="card p-0 overflow-hidden shadow-sm rounded-xl">
                 <div class="w-full overflow-x-auto scrollbar-thin">
                    <table class="validation-table w-full min-w-full table-auto">
                       <thead>
@@ -406,8 +441,10 @@ document.querySelector('#app').innerHTML = `
                 </div>
              </div>
 
+             </div>
+
              <!-- Right: Fix Details Panel -->
-             <div id="fixDetails" class="hidden lg:col-span-2 card p-0 shadow-lg flex-col animate-fade-in transition-all duration-300 ease-in-out lg:sticky lg:top-6 self-start max-h-[90vh] overflow-y-auto">
+             <div id="fixDetails" class="card p-0 shadow-lg flex-col lg:sticky lg:top-6 self-start max-h-[90vh]">
                <div class="p-4 border-b bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
                  <h3 class="font-bold text-slate-800 dark:text-slate-200 flex items-center">
                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -1071,6 +1108,8 @@ if (dropZone) {
 
   // Demo Data Injection
   window.tryDemoFile = function () {
+    window.showLoadingState("Analyzing EDI file...");
+    setTimeout(() => {
     const mockData = {
       name: "sample_837_claims_batch.edi",
       type: "837P",
@@ -1104,15 +1143,13 @@ if (dropZone) {
 
     // Animate transition
     const emptyState = document.getElementById('dashboard-empty-state');
-    if (emptyState) {
-      emptyState.classList.add('opacity-0', 'scale-95');
-      setTimeout(() => {
-        window.updateUIFromStore();
-        window.switchView('dashboard');
-      }, 300);
-    } else {
-      window.updateUIFromStore();
-    }
+    if (emptyState) emptyState.classList.add('opacity-0', 'scale-95');
+    
+    window.updateUIFromStore();
+    window.hideLoadingState();
+    // window.switchView('parsed'); // Keep on Dashboard page
+    
+    }, 1200);
   };
 }
 
@@ -1725,15 +1762,14 @@ window.closeFixDetails = function () {
   const table = document.getElementById('validationTable');
 
   if (panel) {
-    panel.classList.add('hidden');
-    panel.classList.remove('flex');
+    panel.classList.remove("show");
+    setTimeout(() => {
+      panel.style.display = "none";
+    }, 300);
   }
   if (modal) {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-  }
-  if (table) {
-    table.classList.replace('lg:col-span-3', 'lg:col-span-5');
   }
 
   // Remove all highlights
@@ -1783,9 +1819,10 @@ window.viewFix = function (segment, description, loop, severity, buttonEl) {
   // Display Mode Context
   if (window.innerWidth >= 1024) {
     // Desktop View
-    table.classList.replace('lg:col-span-5', 'lg:col-span-3');
-    panel.classList.remove('hidden');
-    panel.classList.add('flex');
+    panel.style.display = "block";
+    setTimeout(() => {
+      panel.classList.add("show");
+    }, 10);
 
     // Smooth scroll and layout recalculation
     setTimeout(() => {
@@ -2734,6 +2771,8 @@ document.addEventListener("click", function(e) {
   };
 
   // Toggle layout states
+  const emptyState = document.getElementById("parsedEmptyState");
+  if(emptyState) emptyState.classList.add("hidden");
   panel.classList.remove("hidden");
   void panel.offsetWidth; // force reflow for animation
   panel.classList.add("show");
@@ -2811,6 +2850,8 @@ ${data.example}
     setTimeout(() => {
       if (!panel.classList.contains("show")) {
         panel.classList.add("hidden");
+        const emptyState = document.getElementById("parsedEmptyState");
+        if(emptyState) emptyState.classList.remove("hidden");
       }
     }, 300);
   };

@@ -770,3 +770,158 @@ html, body {
 }
 
 /* --- Cleanup complete --- */
+
+
+/* --- MODERN SAAS 3D EFFECTS --- */
+
+/* 1. Split layout */
+.parsed-wrapper {
+  display: flex;
+  width: 100%;
+  gap: 0;
+  align-items: stretch;
+}
+.edi-left {
+  flex: 1;
+  transition: all 0.3s ease;
+}
+.edi-left.active {
+  flex: 0.7;
+}
+.edi-right {
+  flex: 0.3;
+  min-width: 320px;
+  max-width: 400px;
+  border-left: 1px solid var(--border-color);
+  overflow-y: auto;
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+/* 10. SAFE 3D EFFECTS (IMPORTANT) */
+.card, .edi-right {
+  transform-style: preserve-3d;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 2px 5px rgba(0,0,0,0.05);
+}
+.dark .card, .dark .edi-right {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 11. 3D HOVER EFFECT */
+.segment {
+  transition: all 0.3s ease;
+}
+.segment:hover {
+  transform: perspective(800px) rotateX(2deg) rotateY(-2deg) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  z-index: 10;
+  position: relative;
+}
+.dark .segment:hover {
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+
+/* 12. PANEL 3D ANIMATION */
+.edi-right {
+  transform: perspective(1000px) translateX(40px) rotateY(8deg);
+  opacity: 0;
+  transition: all 0.35s ease;
+}
+.edi-right.show {
+  transform: perspective(1000px) translateX(0) rotateY(0);
+  opacity: 1;
+}
+
+/* 13. BUTTON 3D EFFECT */
+button {
+  transition: all 0.2s ease;
+}
+button:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* 14. LOADING ANIMATION */
+@keyframes pulse {
+  0% { opacity: 0.6; transform: scale(0.95) }
+  50% { opacity: 1; transform: scale(1) }
+  100% { opacity: 0.6; transform: scale(0.95) }
+}
+.loader-spinner {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* 15. LOGIN PAGE 3D */
+.login-bg {
+  background: linear-gradient(-45deg, #0f172a, #1e3a8a, #3b82f6, #1d4ed8);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .login-bg {
+  background: linear-gradient(-45deg, #020617, #0f172a, #1e293b, #0f172a);
+  background-size: 400% 400%;
+}
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transform-style: preserve-3d;
+}
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  animation: floatShape 10s infinite ease-in-out alternate;
+  pointer-events: none;
+}
+@keyframes floatShape {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  100% { transform: translateY(-50px) rotate(180deg) scale(1.1); }
+}
+
+
+/* Validation Container Flex Layout */
+.validation-container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+.table-section {
+  flex: 1;
+  transition: 0.3s;
+  min-width: 0;
+}
+#fixDetails {
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+  display: none;
+}
+#fixDetails.show {
+  width: 350px;
+  min-width: 350px;
+  opacity: 1;
+  display: flex !important;
+}
