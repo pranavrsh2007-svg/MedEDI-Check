@@ -1703,15 +1703,6 @@ window.updateValidationReportUI = function (errors, fileName, transType = 'unkno
   });
 
 
-  // Auto-open first error row if exists
-  const firstErrorRow = tbody.querySelector('tr.validation-row');
-  if (firstErrorRow) {
-    // Small delay to ensure DOM is ready and animation looks smooth
-    setTimeout(() => {
-      firstErrorRow.click();
-    }, 100);
-  }
-
   // Show/Hide Download button if there's content to download
   const downloadBtn = document.getElementById('download-btn');
   if (downloadBtn) {
