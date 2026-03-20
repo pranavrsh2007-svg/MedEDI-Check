@@ -525,3 +525,228 @@ html {
 .login-card button:hover {
   transform: scale(1.03);
 }
+
+/* --- Interactive EDI Analyzer UI --- */
+
+/* Individual Segment Styling */
+.segment {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid transparent;
+  cursor: pointer;
+}
+
+.segment:hover {
+  background: rgba(241, 245, 249, 0.8) !important;
+  border-left-color: rgba(148, 163, 184, 0.5);
+}
+
+.dark .segment:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-left-color: rgba(71, 85, 105, 0.5);
+}
+
+/* Active Segment Highlighting */
+.segment.active {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-left: 4px solid #3b82f6 !important;
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  z-index: 10;
+}
+
+.dark .segment.active {
+  background: rgba(59, 130, 246, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Details Panel Animation */
+.segment-details-panel {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Modern Detail Card Polish */
+.detail-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.dark .detail-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.detail-header {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.dark .detail-header {
+  border-bottom-color: #334155;
+  background: #0f172a;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .parsed-data-container {
+    flex-direction: column !important;
+  }
+  
+  .segment-details-panel {
+    width: 100% !important;
+    position: static !important;
+    margin-top: 24px;
+    animation: slideInUp 0.4s ease;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Detail Elements Badge */
+.element-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  color: #475569;
+  margin: 2px;
+}
+
+.dark .element-badge {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* --- Root & Stable Layout Fixes --- */
+
+html, body {
+  height: 100% !important;
+  margin: 0 !important;
+  overflow: hidden !important; /* Prevent double scrollbars */
+}
+
+#app {
+  height: 100vh !important;
+  width: 100vw !important;
+  display: flex !important;
+  overflow: hidden !important;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page-container {
+  display: flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  gap: 0 !important; /* User requested border-left for separation */
+}
+
+.edi-tree {
+  flex: 1 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  padding: 16px !important;
+  scrollbar-width: thin;
+}
+
+/* --- Parsed Data Split View Layout --- */
+.parsed-wrapper {
+  display: flex !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  height: calc(100vh - 220px) !important;
+  min-height: 500px !important;
+  width: 100% !important;
+}
+
+.edi-left {
+  flex: 1 !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.edi-left.active {
+  flex: 0.7 !important;
+}
+
+.edi-tree {
+  flex: 1 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+}
+
+.edi-right {
+  flex: 0.3 !important;
+  max-width: 400px !important;
+  min-width: 320px !important;
+  height: 100% !important;
+  background: white !important;
+  border-left: 1px solid #e5e7eb !important;
+  padding: 20px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  overflow-y: auto !important;
+  
+  /* ANIMATION BASE */
+  transform: translateX(20px) !important;
+  opacity: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.edi-right.show {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+}
+
+.dark .edi-right {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  border-left-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+#askAiBtn:hover {
+  background: #1d4ed8 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+#askAiBtn:active {
+  transform: translateY(0);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- Cleanup complete --- */

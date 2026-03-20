@@ -24,7 +24,6 @@ window.goToUpload = function () {
   }
 };
 
-
 // Global EDI Store for shared state management
 window.ediStore = {
   uploadedFiles: JSON.parse(localStorage.getItem('edi_files') || '[]'),
@@ -341,7 +340,7 @@ document.querySelector('#app').innerHTML = `
        </section>
 
         <section id="view-parsed" class="view-section hidden animate-fade-in max-w-7xl mx-auto py-8">
-          <div class="flex justify-between items-end mb-6">
+          <div class="flex justify-between items-end mb-6 px-4">
              <div>
                <h2 class="text-2xl font-bold transition-colors duration-300">Parsed EDI Structure</h2>
                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors duration-300">Showing hierarchical view of 837 Claim data</p>
@@ -353,56 +352,22 @@ document.querySelector('#app').innerHTML = `
                   Download JSON
                </button>
             </div>
-         </div>
-         
-         <div class="flex flex-col lg:flex-row gap-6">
-            <div class="flex-1 card p-6 shadow-sm overflow-hidden bg-white dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
-               <ul class="space-y-2 text-sm font-mono tree-root"><li class="p-8 text-center text-slate-500 italic">No EDI data to display. Please upload a file first.</li></ul>
-                                   </li>
-                                </ul>
-                             </li>
-                          </ul>
-                       </li>
-                    </ul>
-                 </li>
-              </ul>
-           </div>
-           
-           <!-- Right: Segment Details Panel -->
-           <div id="segment-details-panel" class="w-full lg:w-96 card p-0 shadow-lg hidden flex-col animate-slide-up sticky top-24 self-start">
-             <div class="p-4 border-b bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center transition-colors duration-300">
-               <h3 class="font-bold text-slate-800 dark:text-slate-100 flex items-center">
-                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                 Segment Details
-               </h3>
-               <button onclick="window.closeSegmentDetails()" class="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700">
-                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-               </button>
-             </div>
-             <div class="p-6 transition-colors duration-300">
-               <div class="flex items-center mb-4">
-                 <span id="detail-badge" class="font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded text-lg mr-3 border border-blue-200 dark:border-blue-800 shadow-sm">ISA</span>
-                 <h4 id="detail-title" class="font-bold text-slate-800 dark:text-slate-100 text-lg leading-tight">Interchange Control Header</h4>
-               </div>
-               <p id="detail-desc" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">Contains sender and receiver information for the EDI transmission.</p>
-               
-               <h5 class="font-bold text-slate-700 dark:text-slate-200 text-sm mb-2 flex items-center mt-2">
-                 <svg class="w-4 h-4 mr-1 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                 Purpose in EDI
-               </h5>
-               <p id="detail-purpose" class="text-sm text-slate-600 dark:text-slate-300 mb-6 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg border border-slate-100 dark:border-slate-600">To start and identify an interchange of zero or more functional groups and interchange-related control segments.</p>
-               
-               <h5 class="font-bold text-slate-700 dark:text-slate-200 text-sm mb-2 flex items-center">
-                 <svg class="w-4 h-4 mr-1 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                 Example Elements
-               </h5>
-               <div id="detail-elements" class="bg-slate-800 dark:bg-slate-900 text-blue-300 p-4 rounded-lg font-mono text-xs overflow-x-auto shadow-inner leading-relaxed whitespace-pre-wrap border dark:border-slate-700">ISA*00*          *00*          *ZZ*SENDERID       *ZZ*RECEIVERID     *030101*1253*U*00501*000000905*1*T*:~</div>
-             </div>
-           </div>
-         </div>
-       </section>
+          </div>
+          
+          <div class="parsed-wrapper">
+            <div class="edi-left">
+              <div class="edi-tree card p-6 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
+                <ul class="space-y-2 text-sm font-mono tree-root">
+                  <li class="p-8 text-center text-slate-500 italic">No EDI data to display. Please upload a file first.</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div id="detailsPanel" class="edi-right hidden"></div>
+          </div>
+        </section>
 
-       <section id="view-validation" class="view-section hidden animate-fade-in w-full px-4 sm:px-6 lg:px-8 py-8">
+        <section id="view-validation" class="view-section hidden animate-fade-in w-full px-4 sm:px-6 lg:px-8 py-8">
          <div class="flex justify-between items-end mb-6">
             <div>
               <h2 class="text-2xl font-bold">Validation Report</h2>
@@ -787,11 +752,14 @@ window.switchView = function (viewId) {
     activeView.classList.add('block')
 
     if (viewId === 'assistant') {
-      const savedPrompt = localStorage.getItem('aiPrompt');
+      const savedPrompt = localStorage.getItem('aiPrompt') || localStorage.getItem('ai_query');
       if (savedPrompt) {
         const aiInput = document.getElementById('aiInput');
         if (aiInput) {
           aiInput.value = savedPrompt;
+          // Clean up
+          localStorage.removeItem('aiPrompt');
+          localStorage.removeItem('ai_query');
         }
       }
     }
@@ -827,6 +795,12 @@ window.switchView = function (viewId) {
   if (viewId === 'summary') {
     window.updateSummaryUI();
   }
+
+  // Navigation Fix: Reset scroll position to top
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+    console.log(`[Navigation] Scrolled to top for view: ${viewId}`);
+  }, 0);
 }
 
 // Add event listeners
@@ -1216,10 +1190,10 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
 
     if (isWrapper) {
       return `
-                <div class="flex items-center group cursor-pointer p-2 hover:bg-slate-50 rounded-lg border ${errorClass} transition-colors" onclick="window.showSegmentDetails('${segId}')">
+                <div class="segment flex items-center group cursor-pointer p-2 hover:bg-slate-50 rounded-lg border ${errorClass} transition-colors" data-type="${segId}">
                     <svg class="w-4 h-4 mr-2 text-slate-400 group-hover:text-blue-500 transition-colors transform rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                     <span class="font-bold mr-2 px-1.5 rounded ${colorClass}">${segId}</span>
-                    <span class="text-slate-600">${def.title}</span>
+                    <span class="text-slate-600 font-medium">${def.title}</span>
                     <span class="ml-auto text-[10px] text-slate-400 font-mono">L${lineNum}</span>
                     ${hasError ? '<span class="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>' : ''}
                 </div>
@@ -1227,9 +1201,9 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
     }
 
     return `
-            <div class="flex items-center p-1.5 hover:bg-slate-50 rounded text-xs cursor-pointer group/line border ${errorClass}" onclick="window.showSegmentDetails('${segId}')">
+            <div class="segment flex items-center p-1.5 hover:bg-slate-50 rounded text-xs cursor-pointer group/line border ${errorClass}" data-type="${segId}">
                 <span class="font-bold w-12 mr-2 ${colorClass} px-1 rounded">${segId}*</span>
-                <span class="text-slate-500 truncate max-w-lg">${segData.substring(0, 80)}${segData.length > 80 ? '...' : ''}</span>
+                <span class="text-slate-500 truncate max-w-lg font-mono">${segData.substring(0, 80)}${segData.length > 80 ? '...' : ''}</span>
                 <span class="ml-auto text-[10px] text-slate-400 font-mono">L${lineNum}</span>
                 ${hasError ? '<span class="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>' : ''}
             </div>
@@ -1268,7 +1242,8 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
 
   if (segmentsWithLines.length === 0) {
     treeContainer.innerHTML = `<li class="p-8 text-center text-slate-500 italic">No EDI data to display. Please upload a file first.</li>`;
-    window.closeSegmentDetails();
+    const panel = document.getElementById('detailsPanel');
+    if (panel) panel.classList.add('hidden');
     return;
   }
 
@@ -1294,31 +1269,6 @@ window.updateParsedDataUI = function (segmentsWithLines, transType, fileName, er
             </ul>
         </li>
     `;
-
-  window.showSegmentDetails(segmentsWithLines[0].content.split('*')[0] || 'ISA');
-}
-
-window.showSegmentDetails = function (segment) {
-  const data = EDI_SEGMENTS[segment];
-  const panel = document.getElementById('segment-details-panel');
-  if (!data || !panel) return;
-
-  document.getElementById('detail-badge').innerText = segment;
-  document.getElementById('detail-title').innerText = data.title;
-  document.getElementById('detail-desc').innerText = data.description;
-  document.getElementById('detail-purpose').innerText = data.purpose;
-  document.getElementById('detail-elements').innerText = data.example;
-
-  panel.classList.remove('hidden');
-  panel.classList.add('flex');
-}
-
-window.closeSegmentDetails = function () {
-  const panel = document.getElementById('segment-details-panel');
-  if (panel) {
-    panel.classList.add('hidden');
-    panel.classList.remove('flex');
-  }
 }
 
 // --- Dynamic Validation Logic ---
@@ -2651,4 +2601,145 @@ window.updateSummaryUI = function () {
     }
   }).catch(() => console.log('Chart.js not available'));
 };
+
+
+// --- Dynamic Segment Details Panel Click Logic (Event Delegation) ---
+
+document.addEventListener("click", function(e) {
+
+  let el = e.target;
+
+  // walk up manually (robust fix)
+  while (el && !el.classList?.contains("segment")) {
+    el = el.parentElement;
+  }
+
+  if (!el) return;
+
+  const type = el.getAttribute("data-type");
+  const panel = document.getElementById("detailsPanel");
+  const left = document.querySelector(".edi-left");
+
+  if (!panel || !type || !left) return;
+
+  console.log("Clicked segment:", type);
+
+  const segmentInfo = {
+    ISA: {
+      title: "Interchange Control Header",
+      description: "Contains sender and receiver information.",
+      purpose: "Starts the EDI interchange.",
+      example: "ISA*00*          *00*          *ZZ*SENDERID     *ZZ*RECEIVERID   *230318*1253*U*00501*000000905*1*T*:~"
+    },
+    GS: {
+      title: "Functional Group Header",
+      description: "Groups related transactions.",
+      purpose: "Defines functional group.",
+      example: "GS*HC*SENDER*RECEIVER*20230318*1253*1*X*005010X222A1~"
+    },
+    ST: {
+      title: "Transaction Set Header",
+      description: "Begins a transaction.",
+      purpose: "Identifies transaction type.",
+      example: "ST*837*0001~"
+    },
+    BHT: {
+      title: "Beginning of Hierarchical Transaction",
+      description: "Defines structure of transaction.",
+      purpose: "Starts hierarchical transaction.",
+      example: "BHT*0019*00*0123*20230318*1458*CH~"
+    },
+    NM1: {
+      title: "Individual or Organization Name",
+      description: "Provides entity name details.",
+      purpose: "Identifies payer/provider/patient.",
+      example: "NM1*IL*1*SMITH*JOHN****MI*123456789~"
+    },
+    N3: {
+      title: "Address Information",
+      description: "Provides street address.",
+      purpose: "Specifies address line.",
+      example: "N3*123 MAIN ST~"
+    },
+    N4: {
+      title: "City, State, ZIP",
+      description: "Provides location details.",
+      purpose: "Specifies city/state/zip.",
+      example: "N4*CHICAGO*IL*60601~"
+    }
+  };
+
+  const data = segmentInfo[type] || {
+    title: "EDI Segment " + type,
+    description: "Standard X12 EDI segment.",
+    purpose: "Provides specific data within the transaction hierarchy.",
+    example: type + "*...~"
+  };
+
+  // Toggle layout states
+  panel.classList.remove("hidden");
+  void panel.offsetWidth; // force reflow for animation
+  panel.classList.add("show");
+  left.classList.add("active");
+
+  panel.innerHTML = `
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="background:#e0edff; color:#2563eb; padding:4px 10px; border-radius:6px; font-weight:600; font-size:12px;">
+        ${type}
+      </span>
+      <span style="font-weight:600; font-size:16px;">${data.title}</span>
+    </div>
+    <button id="closeBtn" style="background:none; border:none; font-size:18px; cursor:pointer; color:#64748b; transition:color 0.2s;">✖</button>
+  </div>
+
+  <p style="color:#475569; font-size:14px; line-height:1.5; margin-bottom:16px;">${data.description}</p>
+
+  <div style="margin-top:16px;">
+    <div style="font-weight:600; font-size:13px; color:#1e293b; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+      <span>⚙</span> Purpose in EDI
+    </div>
+    <div style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:13px; color:#334155; border: 1px solid #e2e8f0;">
+      ${data.purpose}
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <div style="font-weight:600; font-size:13px; color:#1e293b; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+      <span>💻</span> Example Elements
+    </div>
+    <pre style="background:#1e293b; color:#e2e8f0; padding:12px; border-radius:10px; font-size:12px; overflow-x:auto; font-family: 'JetBrains Mono', monospace;">
+${data.example}
+    </pre>
+  </div>
+
+  <div style="margin-top:20px; padding-top:20px; border-top: 1px solid #f1f5f9;">
+    <button id="askAiBtn" style="width:100%; background:#2563eb; color:white; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s;">
+      🤖 Ask AI about this segment
+    </button>
+  </div>
+`;
+
+  document.getElementById("closeBtn").onclick = () => {
+    panel.classList.remove("show");
+    left.classList.remove("active");
+    // Wait for animation to finish before hiding completely
+    setTimeout(() => {
+      if (!panel.classList.contains("show")) {
+        panel.classList.add("hidden");
+      }
+    }, 300);
+  };
+
+  const askBtn = document.getElementById("askAiBtn");
+  if (askBtn) {
+    askBtn.onclick = () => {
+      const message = `Explain the EDI segment ${type} in simple terms with examples and common errors.`;
+      localStorage.setItem("ai_query", message);
+      window.switchView("assistant");
+    };
+  }
+
+});
+
 
