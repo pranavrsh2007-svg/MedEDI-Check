@@ -321,37 +321,50 @@ function injectLogoutButton() {
 // ─── Auth State Machine ───────────────────────────────────────────────────────
 let dashboardLoaded = false;
 
+// --- Config Validation ---
+if (!firebaseConfig.apiKey) {
+  console.error("[Auth] Missing Firebase API Key. Please check your .env or Vercel Environment Variables.");
+}
+
 // Show loading spinner immediately — avoids blank/flash state during auth check
 renderLoadingScreen();
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     console.debug("[Auth] User is authenticated:", user.email, user.uid);
-    window.currentUser = user; // Make user available globally
+    window.currentUser = user; 
     
-    // Ensure we don't reload if already on dashboard
     if (!dashboardLoaded) {
       console.debug("[Auth] Loading dashboard module...");
       dashboardLoaded = true;
       
+      // Update UI to show we are entering the app
+      const appDiv = document.querySelector('#app');
+      if (appDiv && appDiv.querySelector('#auth-google-btn')) {
+        const btn = appDiv.querySelector('#auth-google-btn');
+        btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Entering Portal...</span>`;
+        btn.disabled = true;
+      }
+      
       try {
-        // Dynamic import of dashboard
         await import('./dashboard.js');
-        console.debug("[Auth] Dashboard module loaded successfully.");
+        console.debug("[Auth] Dashboard module loaded.");
         injectLogoutButton();
         
-        // Let dashboard know user is ready
         if (typeof window.initUserDashboard === 'function') {
-           window.initUserDashboard(user);
+           await window.initUserDashboard(user);
         }
       } catch (err) {
-        console.error("[Auth] Failed to load dashboard:", err);
+        console.error("[Auth] Failed to load dashboard module:", err);
         dashboardLoaded = false;
+        isAuthProcessing = false;
+        // If it's a network error or missing chunk, we should tell the user
+        showError("Failed to load application modules. Please check your connection and refresh.");
         renderAuthUI();
       }
     }
   } else {
-    console.debug("[Auth] No active session. Rendering Login UI.");
+    console.debug("[Auth] No active session.");
     dashboardLoaded = false;
     isAuthProcessing = false; 
     window.currentUser = null;
