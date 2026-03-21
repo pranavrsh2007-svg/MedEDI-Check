@@ -7,7 +7,11 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  setPersistence,
+  browserLocalPersistence
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -23,6 +27,19 @@ const firebaseConfig = {
 console.debug("[Firebase] Initializing app...");
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// ─── Setup persistence and handle redirect log in ──────────────────────────
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("[Auth] Persistence error:", error);
+});
+
+getRedirectResult(auth).then((result) => {
+  if (result) {
+    console.debug("[Auth] Redirect result found:", result.user.email);
+  }
+}).catch((error) => {
+  console.error("[Auth] Redirect error:", error);
+});
 
 const appDiv = document.querySelector('#app');
 
@@ -200,15 +217,30 @@ function renderAuthUI() {
     if (isAuthProcessing) return;
     console.debug("[Auth] Starting Google Sign-in...");
     
+    // Call immediately to avoid popup blockers
+    const popupPromise = signInWithPopup(auth, googleProvider);
+    
     clearError();
     setProcessing(true, 'google');
     
     try {
-      await signInWithPopup(auth, googleProvider);
-      console.debug("[Auth] Google Sign-in request sent.");
+      await popupPromise;
+      console.debug("[Auth] Google Sign-in popup success.");
       // onAuthStateChanged will handle routing to dashboard
     } catch (err) {
       console.error("[Auth] Google Error:", err.code, err.message);
+      if (err.code === 'auth/popup-blocked') {
+        console.warn("[Auth] Popup blocked! Falling back to redirect...");
+        showError("Popup blocked. Redirecting to Google Sign-In...");
+        try {
+            await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr) {
+            console.error("[Auth] Redirect error:", redirectErr);
+            showError("Redirect failed. Please check your connection.");
+            setProcessing(false);
+        }
+        return; // Return early, keeping processing true during redirect
+      }
       showError(getFriendlyError(err.code));
       setProcessing(false);
     }
