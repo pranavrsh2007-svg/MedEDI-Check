@@ -53,12 +53,70 @@ window.goToUpload = function () {
   }
 };
 
-// Global EDI Store for shared state management
+// Global EDI Store for shared state management — initially empty, loaded via initUserDashboard
 window.ediStore = {
-  uploadedFiles: JSON.parse(localStorage.getItem('edi_files') || '[]'),
+  uploadedFiles: [],
   currentFile: null,
   parsedData: null,
   validationResults: []
+};
+
+// --- Firestore Integration Support ---
+window.initUserDashboard = async function (user) {
+  if (!user) return;
+  console.debug("[Dashboard] Syncing with Firestore for user:", user.uid);
+  
+  if (!window.db) {
+    console.warn("[Dashboard] Firestore (db) not initialized yet.");
+    return;
+  }
+
+  // Set Profile UI
+  const profileName = document.querySelector('aside .text-sm.font-medium');
+  const profileRole = document.querySelector('aside .text-xs.text-slate-500');
+  const profileAvatar = document.querySelector('aside .w-8.h-8.rounded-full');
+  
+  if (profileName) profileName.innerText = user.displayName || user.email.split('@')[0];
+  if (profileRole) profileRole.innerText = "Authorized User";
+  if (profileAvatar) profileAvatar.innerText = (user.displayName || user.email).substring(0, 2).toUpperCase();
+
+  // Load User Data from Firestore
+  try {
+    const userDocRef = doc(window.db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      console.debug("[Dashboard] Loaded user data:", data);
+      window.ediStore.uploadedFiles = data.uploadedFiles || [];
+      // Also load global stats
+      if (data.globalStats) {
+        localStorage.setItem('globalStats', JSON.stringify(data.globalStats));
+      }
+      if (data.fileStats) {
+        localStorage.setItem('fileStats', JSON.stringify(data.fileStats));
+      }
+    } else {
+      console.debug("[Dashboard] No user document found. Creating one...");
+      await setDoc(userDocRef, {
+        email: user.email,
+        createdAt: new Date().toISOString(),
+        uploadedFiles: [],
+        globalStats: { totalFiles: 0, totalErrors: 0, totalSegments: 0, totalAmount: 0 },
+        fileStats: { total: 0, "837": 0, "835": 0, "834": 0 }
+      });
+    }
+
+    // After data is loaded, update UI
+    window.updateUIFromStore();
+    window.runDashboardAnimations();
+
+  } catch (err) {
+    console.error("[Dashboard] Firestore error:", err);
+    // Fallback to localStorage if Firestore fails
+    window.ediStore.uploadedFiles = JSON.parse(localStorage.getItem('edi_files') || '[]');
+    window.updateUIFromStore();
+  }
 };
 
 document.querySelector('#app').innerHTML = `
@@ -1039,8 +1097,24 @@ if (dropZone) {
       window.ediStore.currentFile = newFileEntry;
       window.ediStore.uploadedFiles = [newFileEntry, ...window.ediStore.uploadedFiles.slice(0, 4)];
 
-      // Persist history
+      // Persist history manually as backup
       localStorage.setItem('edi_files', JSON.stringify(window.ediStore.uploadedFiles));
+      
+      // PERSIST IN FIRESTORE FOR SAFETY (User specific data)
+      if (window.currentUser && window.db) {
+         try {
+           const userDocRef = doc(window.db, "users", window.currentUser.uid);
+           updateDoc(userDocRef, {
+              uploadedFiles: window.ediStore.uploadedFiles,
+              lastUpdatedAt: new Date().toISOString()
+           }).catch(() => {
+              // fallback if nested doc doesn't exist yet but it should from init
+              setDoc(userDocRef, { uploadedFiles: window.ediStore.uploadedFiles }, { merge: true });
+           });
+         } catch (fErr) {
+           console.error("[Auth] Firestore sync error:", fErr);
+         }
+      }
 
       // Dismiss Demo Mode on real file upload
       isDemoMode = false;
@@ -2448,47 +2522,66 @@ window.highlightSelectedFile = function (fileName) {
   });
 };
 
-window.addEventListener("load", () => {
+// Consolidated Modern Startup Logic
+const initApp = () => {
+  console.debug("[Dashboard] Initializing application components...");
+  
+  // 1. Sync Theme
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+
+  // 2. Load Selected File (if persists across refresh)
   const fileName = localStorage.getItem("selectedFileName");
   const ediText = localStorage.getItem("selectedFileData");
-
   if (fileName && ediText) {
-    console.log("Loading selected file:", fileName);
-
-    // call existing function
+    console.debug("[Dashboard] Restoring selected file from storage:", fileName);
     if (window.updateDashboardSummaryUI) {
       window.updateDashboardSummaryUI(ediText, fileName);
     }
-  } else {
-    console.log("No selected file found");
   }
-});
 
-// Initialize on first load
-document.addEventListener('DOMContentLoaded', () => {
+  // 3. Run Animations
   window.runDashboardAnimations();
 
-  // Startup Splash Animation
-  const splash = document.createElement('div');
-  splash.id = 'startup-splash';
-  splash.innerHTML = `
-    <div class="splash-content flex flex-col items-center">
-      <div class="startup-logo mb-6">
-        <img src="/logo.png" alt="HealthEDI Logo">
+  // 4. Splash Screen (only if not already shown this session)
+  if (!sessionStorage.getItem('splash_shown')) {
+    const splash = document.createElement('div');
+    splash.id = 'startup-splash';
+    splash.innerHTML = `
+      <div class="splash-content flex flex-col items-center">
+        <div class="startup-logo mb-6">
+          <img src="/logo.png" alt="HealthEDI Logo" class="w-20 h-20 rounded-2xl shadow-2xl ring-4 ring-white/20">
+        </div>
+        <h1 class="splash-text text-3xl font-black text-white tracking-tighter">HealthEDI Analyzer</h1>
+        <p class="text-white/60 mt-2 font-medium tracking-widest text-[10px] uppercase">Enterprise Grade Intelligence</p>
       </div>
-      <h1 class="splash-text">HealthEDI Analyzer</h1>
-    </div>
-  `;
-  document.body.appendChild(splash);
+    `;
+    document.body.appendChild(splash);
+    sessionStorage.setItem('splash_shown', 'true');
 
-  // Fade out and remove
-  setTimeout(() => {
-    splash.classList.add('fade-out');
     setTimeout(() => {
-      splash.remove();
-    }, 500);
-  }, 1200);
-});
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.remove(), 500);
+    }, 1500);
+  }
+
+  // 5. Explicitly sync with User if already available
+  if (window.currentUser) {
+    window.initUserDashboard(window.currentUser);
+  }
+};
+
+// Handle both standard load and dynamic import scenarios
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // Use a small timeout to ensure innerHTML parsing is complete
+  setTimeout(initApp, 50);
+}
 
 window.updateSummaryUI = function () {
   const file = window.ediStore && window.ediStore.currentFile;
@@ -2576,6 +2669,20 @@ window.updateSummaryUI = function () {
     else if (detectType.includes('834')) fileStats['834']++;
     localStorage.setItem('fileStats', JSON.stringify(fileStats));
     sessionStorage.setItem(sessionProcessedKey, 'true');
+
+    // SYNC STATS TO FIRESTORE
+    if (window.currentUser && window.db) {
+      try {
+        const userDocRef = doc(window.db, "users", window.currentUser.uid);
+        updateDoc(userDocRef, {
+          globalStats: globalStats,
+          fileStats: fileStats,
+          lastUpdatedAt: new Date().toISOString()
+        });
+      } catch (fErr) {
+        console.error("[Dashboard] Stats sync error:", fErr);
+      }
+    }
   }
 
   // Populate Global Stats Cards

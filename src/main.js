@@ -13,6 +13,15 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "firebase/auth";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  arrayUnion, 
+  onSnapshot 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,6 +36,10 @@ const firebaseConfig = {
 console.debug("[Firebase] Initializing app...");
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Make db available globally for dashboard.js to use
+window.db = db;
 
 // ─── Setup persistence and handle redirect log in ──────────────────────────
 setPersistence(auth, browserLocalPersistence).catch((error) => {
@@ -311,28 +324,37 @@ let dashboardLoaded = false;
 // Show loading spinner immediately — avoids blank/flash state during auth check
 renderLoadingScreen();
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
-    console.debug("[Auth] User is authenticated:", user.email);
+    console.debug("[Auth] User is authenticated:", user.email, user.uid);
+    window.currentUser = user; // Make user available globally
+    
+    // Ensure we don't reload if already on dashboard
     if (!dashboardLoaded) {
       console.debug("[Auth] Loading dashboard module...");
       dashboardLoaded = true;
-      import('./dashboard.js')
-        .then(() => {
-          console.debug("[Auth] Dashboard module loaded successfully.");
-          injectLogoutButton();
-        })
-        .catch(err => {
-          console.error("[Auth] Failed to load dashboard:", err);
-          dashboardLoaded = false;
-          // Re-render auth UI so they can at least try again
-          renderAuthUI();
-        });
+      
+      try {
+        // Dynamic import of dashboard
+        await import('./dashboard.js');
+        console.debug("[Auth] Dashboard module loaded successfully.");
+        injectLogoutButton();
+        
+        // Let dashboard know user is ready
+        if (typeof window.initUserDashboard === 'function') {
+           window.initUserDashboard(user);
+        }
+      } catch (err) {
+        console.error("[Auth] Failed to load dashboard:", err);
+        dashboardLoaded = false;
+        renderAuthUI();
+      }
     }
   } else {
     console.debug("[Auth] No active session. Rendering Login UI.");
     dashboardLoaded = false;
-    isAuthProcessing = false; // Reset flag in case we logged out or session expired
+    isAuthProcessing = false; 
+    window.currentUser = null;
     renderAuthUI();
   }
 });
